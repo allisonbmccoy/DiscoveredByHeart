@@ -35,22 +35,33 @@ a { color: var(--pink-dark); }
 }
 
 .topbar-inner {
-  min-height: 88px;
+  min-height: 82px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
 }
 
-.brand-link { display: inline-flex; align-items: center; }
-.brand-logo { width: 275px; height: auto; display: block; }
-.top-link {
-  color: var(--dark-blue);
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.92rem;
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  width: min(255px, 48vw);
+  overflow: hidden;
 }
-.top-link:hover { color: var(--pink); }
+.brand-logo {
+  display: block;
+  width: 100%;
+  max-width: 255px;
+  height: auto;
+  object-fit: contain;
+}
+.resource-label {
+  color: var(--dark-blue);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
 
 .hero {
   background: var(--light-blue);
@@ -74,11 +85,24 @@ a { color: var(--pink-dark); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 50px;
-  padding: 70px 0 68px;
+  gap: 56px;
+  padding: 58px 0 62px;
 }
 
 .hero-copy { max-width: 760px; }
+.hero-heart {
+  flex: 0 0 auto;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.56);
+  color: var(--pink);
+  font-family: "Varela Round", sans-serif;
+  font-size: 7.2rem;
+  line-height: 1;
+}
 .eyebrow {
   margin: 0 0 9px;
   color: var(--pink);
@@ -109,7 +133,7 @@ h1 span { color: var(--pink); }
   color: var(--dark-blue);
 }
 .hero-detail { margin: 13px 0 0; max-width: 680px; color: var(--muted); font-size: 1rem; }
-.hero-button { flex: 0 0 auto; max-width: 260px; text-align: center; }
+.hero-button { margin-top: 24px; text-align: center; }
 
 .main-content { padding-top: 34px; }
 
@@ -207,7 +231,7 @@ input:focus, select:focus, button:focus, a:focus {
   display: inline-flex; align-items: center; justify-content: center; min-height: 45px; border-radius: 8px;
   padding: 10px 17px; font: inherit; font-weight: 800; text-decoration: none; cursor: pointer;
 }
-.button-primary { background: var(--pink); color: #fff; border: 1px solid var(--pink); }
+.button-primary { background: var(--pink); color: #fff; border: 1px solid var(--pink); box-shadow: 0 6px 16px rgba(247, 80, 106, 0.16); }
 .button-primary:hover { background: var(--pink-dark); border-color: var(--pink-dark); }
 .button-ghost { color: var(--dark-blue); background: #fff; border: 1px solid #bfcbd5; }
 .button-ghost:hover { background: var(--light-blue); }
@@ -249,17 +273,18 @@ footer a { color: #fff; }
 [hidden] { display: none !important; }
 
 @media (max-width: 850px) {
-  .hero-inner { align-items: flex-start; flex-direction: column; padding: 52px 0; }
-  .hero-button { max-width: none; }
+  .hero-inner { align-items: flex-start; flex-direction: column; padding: 48px 0; }
+  .hero-heart { display: none; }
   .filter-grid { grid-template-columns: 1fr 1fr; }
   .details-panel dl { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
   .wrap { width: min(100% - 24px, 1120px); }
-  .topbar-inner { min-height: 75px; }
-  .brand-logo { width: 220px; }
-  .top-link { display: none; }
+  .topbar-inner { min-height: 70px; }
+  .brand-link { width: min(220px, 62vw); }
+  .brand-logo { max-width: 220px; }
+  .resource-label { display: none; }
   .hero-inner { padding: 42px 0; }
   .filter-grid { grid-template-columns: 1fr; }
   .controls, .study-card { padding: 20px; }

@@ -342,6 +342,8 @@ async function loadStudies() {
     });
 
     populateStateFilter();
+    els.error.hidden = true;
+    els.loading.hidden = true;
     render();
 
     if (allStudies.length && !els.results.children.length) {
@@ -349,8 +351,11 @@ async function loadStudies() {
     }
   } catch (error) {
     console.error(error);
+    els.loading.hidden = true;
     els.error.hidden = false;
-    els.count.textContent = "Studies unavailable";
+    if (!allStudies.length) {
+      els.count.textContent = "Studies unavailable";
+    }
   } finally {
     els.loading.hidden = true;
   }
