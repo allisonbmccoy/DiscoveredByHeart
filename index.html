@@ -3,44 +3,58 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Single Ventricle Clinical Trial Finder</title>
+  <title>Discovered by Heart | Sisters by Heart</title>
   <meta
     name="description"
-    content="Find recruiting and soon-to-open single ventricle research studies from ClinicalTrials.gov."
+    content="Explore open research opportunities for the single ventricle community, powered by ClinicalTrials.gov."
   />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://clinicaltrials.gov" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="site-header">
-    <div class="wrap header-inner">
-      <div>
-        <p class="eyebrow">Sisters by Heart</p>
-        <h1>Single Ventricle Clinical Trial Finder</h1>
-        <p class="lede">
-          Explore studies that are recruiting now or preparing to recruit people
-          with single ventricle heart disease.
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand-link" href="https://www.sistersbyheart.org/" target="_blank" rel="noopener noreferrer" aria-label="Sisters by Heart home">
+        <img src="SBH_Logo_RGB_Pos.png" alt="Sisters by Heart" class="brand-logo" />
+      </a>
+      <a class="top-link" href="https://www.sistersbyheart.org/linkedbyheart" target="_blank" rel="noopener noreferrer">Linked by Heart</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">A Sisters by Heart research resource</p>
+        <h1>Discovered <span>by Heart</span></h1>
+        <p class="lede">Explore research opportunities for the single ventricle community.</p>
+        <p class="hero-detail">
+          Find studies that are recruiting now or preparing to recruit, with information drawn directly from ClinicalTrials.gov.
         </p>
       </div>
       <a
         id="expert-search-link"
-        class="button button-secondary"
+        class="button button-primary hero-button"
         href="https://clinicaltrials.gov/expert-search"
         target="_blank"
         rel="noopener noreferrer"
       >
-        Open on ClinicalTrials.gov
+        View full search on ClinicalTrials.gov
       </a>
     </div>
-  </header>
+  </section>
 
-  <main class="wrap">
+  <main class="wrap main-content">
     <section class="notice" aria-label="Important information">
-      <strong>Before you begin:</strong>
-      This page is for informational purposes and does not determine whether someone
-      is eligible for a study. Study teams make final eligibility decisions.
-      Always review the official ClinicalTrials.gov record and discuss participation
-      with your child's or your own healthcare team.
+      <div class="notice-icon" aria-hidden="true">♡</div>
+      <div>
+        <strong>Before you begin</strong>
+        <p>
+          This resource is for informational purposes and does not determine whether someone is eligible for a study. Study teams make final eligibility decisions. Always review the official ClinicalTrials.gov record and discuss participation with your child's or your own healthcare team.
+        </p>
+      </div>
     </section>
 
     <section class="controls" aria-labelledby="filter-heading">
@@ -49,20 +63,13 @@
           <p class="eyebrow">Current opportunities</p>
           <h2 id="filter-heading">Find a study that may fit your family</h2>
         </div>
-        <button id="refresh-button" class="text-button" type="button">
-          Refresh studies
-        </button>
+        <button id="refresh-button" class="text-button" type="button">Refresh studies</button>
       </div>
 
       <div class="filter-grid">
         <label>
           <span>Search within results</span>
-          <input
-            id="text-filter"
-            type="search"
-            placeholder="e.g., Fontan, HLHS, exercise"
-            autocomplete="off"
-          />
+          <input id="text-filter" type="search" placeholder="e.g., Fontan, HLHS, exercise" autocomplete="off" />
         </label>
 
         <label>
@@ -105,45 +112,40 @@
       <div class="spinner" aria-hidden="true"></div>
       <div>
         <strong>Searching ClinicalTrials.gov</strong>
-        <p>We’re loading the latest matching studies.</p>
+        <p>We're loading the latest matching studies.</p>
       </div>
     </div>
 
     <div id="error" class="error-card" hidden>
-      <h2>We couldn’t load studies right now.</h2>
-      <p>
-        You can still open the same search directly on ClinicalTrials.gov using the
-        button above.
-      </p>
+      <div class="error-heart" aria-hidden="true">♡</div>
+      <div>
+        <h2>We couldn't load studies right now.</h2>
+        <p>You can still open the same search directly on ClinicalTrials.gov using the button above.</p>
+      </div>
     </div>
 
     <section id="results" class="results" aria-label="Clinical trial results"></section>
 
     <section class="about-search">
+      <p class="eyebrow">About Discovered by Heart</p>
       <h2>What this search includes</h2>
       <p>
-        The search looks for single ventricle terminology and common diagnoses,
-        including hypoplastic left heart syndrome (HLHS), tricuspid atresia,
-        double inlet left ventricle, mitral atresia, unbalanced atrioventricular
-        canal defects, and pulmonary atresia with intact ventricular septum.
-        It also looks for studies described by the Norwood, Glenn, and Fontan
-        pathways.
+        The search looks for single ventricle terminology and common diagnoses, including hypoplastic left heart syndrome (HLHS), tricuspid atresia, double inlet left ventricle, mitral atresia, unbalanced atrioventricular canal defects, and pulmonary atresia with intact ventricular septum. It also looks for studies described by the Norwood, Glenn, and Fontan pathways.
       </p>
-      <p>
-        Only studies listed as <strong>Recruiting</strong> or
-        <strong>Not yet recruiting</strong> are shown.
-      </p>
+      <p>Only studies listed as <strong>Recruiting</strong> or <strong>Not yet recruiting</strong> are shown.</p>
     </section>
   </main>
 
   <footer>
-    <div class="wrap">
-      <p>
-        Study information is retrieved from
-        <a href="https://clinicaltrials.gov/" target="_blank" rel="noopener noreferrer">
-          ClinicalTrials.gov
-        </a>.
-      </p>
+    <div class="wrap footer-inner">
+      <img src="SBH_Logo_RGB_Pos.png" alt="Sisters by Heart" class="footer-logo" />
+      <div>
+        <p><strong>Discovered by Heart</strong> is a Sisters by Heart resource for the single ventricle community.</p>
+        <p>
+          Study information is retrieved from
+          <a href="https://clinicaltrials.gov/" target="_blank" rel="noopener noreferrer">ClinicalTrials.gov</a>.
+        </p>
+      </div>
     </div>
   </footer>
 
@@ -153,49 +155,29 @@
         <span class="status-badge"></span>
         <span class="nct-id"></span>
       </div>
-
       <h2 class="study-title"></h2>
-
       <div class="meta-row">
         <span class="meta ages"></span>
         <span class="meta study-type"></span>
       </div>
-
       <p class="summary"></p>
-
       <div class="condition-section">
         <h3>Who this study is about</h3>
         <div class="condition-tags"></div>
       </div>
-
       <div class="location-section">
         <h3>Where it is available</h3>
         <p class="locations"></p>
       </div>
-
       <div class="card-actions">
-        <a class="button study-link" target="_blank" rel="noopener noreferrer">
-          View official study
-        </a>
-        <button class="button button-ghost details-toggle" type="button">
-          More details
-        </button>
+        <a class="button button-primary study-link" target="_blank" rel="noopener noreferrer">View official study</a>
+        <button class="button button-ghost details-toggle" type="button">More details</button>
       </div>
-
       <div class="details-panel" hidden>
         <dl>
-          <div>
-            <dt>Enrollment</dt>
-            <dd class="enrollment"></dd>
-          </div>
-          <div>
-            <dt>Sex</dt>
-            <dd class="sex"></dd>
-          </div>
-          <div>
-            <dt>Study sponsor</dt>
-            <dd class="sponsor"></dd>
-          </div>
+          <div><dt>Enrollment</dt><dd class="enrollment"></dd></div>
+          <div><dt>Sex</dt><dd class="sex"></dd></div>
+          <div><dt>Study sponsor</dt><dd class="sponsor"></dd></div>
         </dl>
       </div>
     </article>

@@ -1,5 +1,5 @@
 // ============================================================
-// Sisters by Heart: Single Ventricle Clinical Trial Finder
+// Sisters by Heart: Discovered by Heart
 // ClinicalTrials.gov API v2
 //
 // Edit SEARCH_QUERY below to change the underlying study search.
@@ -125,7 +125,7 @@ function normalizeStudy(study) {
   const contacts = getModule(study, "contactsLocationsModule");
   const sponsor = getModule(study, "sponsorCollaboratorsModule");
 
-  const locations = contacts.locations || [];
+  const locations = Array.isArray(contacts.locations) ? contacts.locations.filter(Boolean) : [];
   const states = [...new Set(
     locations
       .map((loc) => loc.state || loc.country)
@@ -151,8 +151,8 @@ function normalizeStudy(study) {
     title: id.briefTitle || id.officialTitle || "Untitled study",
     status: status.overallStatus || "",
     summary: desc.briefSummary || "A brief study summary is not available.",
-    conditions: cond.conditions || [],
-    ages: elig.stdAges || [],
+    conditions: Array.isArray(cond.conditions) ? cond.conditions.filter(Boolean) : [],
+    ages: Array.isArray(elig.stdAges) ? elig.stdAges.filter(Boolean) : [],
     sex: elig.sex || "ALL",
     studyType: design.studyType || "",
     enrollment: design.enrollmentInfo?.count ?? null,
@@ -235,60 +235,68 @@ function render() {
   }
 
   studies.forEach((study) => {
-    const fragment = els.template.content.cloneNode(true);
-    const card = fragment.querySelector(".study-card");
+    try {
+      const fragment = els.template.content.cloneNode(true);
 
-    const badge = fragment.querySelector(".status-badge");
-    badge.textContent = statusLabel(study.status);
-    badge.classList.add(study.status === "RECRUITING" ? "recruiting" : "soon");
+      const badge = fragment.querySelector(".status-badge");
+      badge.textContent = statusLabel(study.status);
+      badge.classList.add(study.status === "RECRUITING" ? "recruiting" : "soon");
 
-    fragment.querySelector(".nct-id").textContent = study.nctId;
-    fragment.querySelector(".study-title").textContent = study.title;
+      fragment.querySelector(".nct-id").textContent = study.nctId || "ClinicalTrials.gov study";
+      fragment.querySelector(".study-title").textContent = study.title;
 
-    fragment.querySelector(".ages").textContent =
-      study.ages.length ? study.ages.map(humanizeEnum).join(" · ") : "Age not listed";
+      fragment.querySelector(".ages").textContent =
+        study.ages.length ? study.ages.map(humanizeEnum).join(" · ") : "Age not listed";
 
-    fragment.querySelector(".study-type").textContent =
-      study.studyType ? humanizeEnum(study.studyType) : "Study type not listed";
+      fragment.querySelector(".study-type").textContent =
+        study.studyType ? humanizeEnum(study.studyType) : "Study type not listed";
 
-    fragment.querySelector(".summary").textContent = truncate(study.summary);
+      fragment.querySelector(".summary").textContent = truncate(study.summary);
 
-    const tags = fragment.querySelector(".condition-tags");
-    const conditions = study.conditions.slice(0, 8);
-    if (conditions.length) {
-      conditions.forEach((condition) => {
+      const tags = fragment.querySelector(".condition-tags");
+      const conditions = study.conditions.slice(0, 8);
+      if (conditions.length) {
+        conditions.forEach((condition) => {
+          const span = document.createElement("span");
+          span.textContent = condition;
+          tags.append(span);
+        });
+      } else {
         const span = document.createElement("span");
-        span.textContent = condition;
+        span.textContent = "Condition not listed";
         tags.append(span);
+      }
+
+      fragment.querySelector(".locations").textContent = locationText(study);
+
+      const link = fragment.querySelector(".study-link");
+      link.href = study.nctId
+        ? `https://clinicaltrials.gov/study/${encodeURIComponent(study.nctId)}`
+        : "https://clinicaltrials.gov/";
+
+      const enrollmentNumber = Number(study.enrollment);
+      fragment.querySelector(".enrollment").textContent =
+        study.enrollment == null || Number.isNaN(enrollmentNumber)
+          ? "Not listed"
+          : enrollmentNumber.toLocaleString();
+
+      fragment.querySelector(".sex").textContent =
+        study.sex === "ALL" ? "All sexes" : humanizeEnum(study.sex);
+
+      fragment.querySelector(".sponsor").textContent = study.sponsor;
+
+      const toggle = fragment.querySelector(".details-toggle");
+      const panel = fragment.querySelector(".details-panel");
+      toggle.addEventListener("click", () => {
+        const opening = panel.hidden;
+        panel.hidden = !panel.hidden;
+        toggle.textContent = opening ? "Hide details" : "More details";
       });
-    } else {
-      const span = document.createElement("span");
-      span.textContent = "Condition not listed";
-      tags.append(span);
+
+      els.results.append(fragment);
+    } catch (cardError) {
+      console.warn("Skipping a study that could not be displayed", study?.nctId, cardError);
     }
-
-    fragment.querySelector(".locations").textContent = locationText(study);
-
-    const link = fragment.querySelector(".study-link");
-    link.href = `https://clinicaltrials.gov/study/${encodeURIComponent(study.nctId)}`;
-
-    fragment.querySelector(".enrollment").textContent =
-      study.enrollment == null ? "Not listed" : study.enrollment.toLocaleString();
-
-    fragment.querySelector(".sex").textContent =
-      study.sex === "ALL" ? "All sexes" : humanizeEnum(study.sex);
-
-    fragment.querySelector(".sponsor").textContent = study.sponsor;
-
-    const toggle = fragment.querySelector(".details-toggle");
-    const panel = fragment.querySelector(".details-panel");
-    toggle.addEventListener("click", () => {
-      const opening = panel.hidden;
-      panel.hidden = !panel.hidden;
-      toggle.textContent = opening ? "Hide details" : "More details";
-    });
-
-    els.results.append(card);
   });
 }
 
@@ -335,6 +343,10 @@ async function loadStudies() {
 
     populateStateFilter();
     render();
+
+    if (allStudies.length && !els.results.children.length) {
+      throw new Error("Studies were returned but could not be displayed.");
+    }
   } catch (error) {
     console.error(error);
     els.error.hidden = false;

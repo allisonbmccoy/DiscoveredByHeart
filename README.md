@@ -1,62 +1,28 @@
-# Single Ventricle Clinical Trial Finder
+# Discovered by Heart
 
-A lightweight, family-facing website that retrieves open single ventricle studies
-directly from the ClinicalTrials.gov API v2.
+**Explore research opportunities for the single ventricle community.**
+
+Discovered by Heart is a family-facing Sisters by Heart resource that retrieves open single ventricle research studies directly from the ClinicalTrials.gov API v2.
 
 ## What it does
 
 - Uses the Sisters by Heart single ventricle Expert Search expression.
-- Shows only studies with overall status:
-  - RECRUITING
-  - NOT_YET_RECRUITING
-- Lets families filter the returned studies by:
-  - keyword
-  - age group
-  - recruitment status
-  - state/region
-- Links every result to the official ClinicalTrials.gov study page.
+- Shows studies with overall status `RECRUITING` or `NOT_YET_RECRUITING`.
+- Lets families filter results by keyword, age group, recruitment status, and state/region.
+- Links each result to the official ClinicalTrials.gov study record.
 - Displays the ClinicalTrials.gov data refresh date when available.
 
 ## Files
 
-- `index.html` — page structure and family-facing text
-- `styles.css` — responsive design
-- `app.js` — ClinicalTrials.gov API call, search query, filtering, and rendering
+- `index.html` - page structure and family-facing content
+- `styles.css` - Sisters by Heart visual styling
+- `app.js` - ClinicalTrials.gov query, filtering, and rendering
+- `SBH_Logo_RGB_Pos.png` - Sisters by Heart logo
 
-## Easiest way to publish
+## Updating the search
 
-This is a static site. You can upload these three files to:
+The search expression is stored near the top of `app.js` in `SEARCH_QUERY`.
 
-- GitHub Pages
-- Netlify
-- Cloudflare Pages
-- a standard web server
-- a subdirectory of an existing website
+## Hosting
 
-No database or server-side application is required.
-
-## WordPress
-
-If Sisters by Heart uses WordPress, the cleanest production approach is usually to
-host this as a small standalone page or child-theme/template component rather than
-pasting all JavaScript into the visual editor.
-
-## Changing the search
-
-Open `app.js` and edit the `SEARCH_QUERY` constant near the top.
-
-## Important
-
-ClinicalTrials.gov determines the data returned. This site should not imply that a
-listed person is eligible for a study. The official study record and study team
-remain authoritative.
-
-## API
-
-The site uses:
-
-- `https://clinicaltrials.gov/api/v2/studies`
-- `https://clinicaltrials.gov/api/v2/version`
-
-ClinicalTrials.gov documentation:
-https://clinicaltrials.gov/data-about-studies/learn-about-api
+This is a static site and can be hosted with GitHub Pages or another static hosting service. No API key or database is required.
