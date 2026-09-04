@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Single Ventricle Clinical Trial Finder</title>
+  <meta
+    name="description"
+    content="Find recruiting and soon-to-open single ventricle research studies from ClinicalTrials.gov."
+  />
+  <link rel="preconnect" href="https://clinicaltrials.gov" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div>
+        <p class="eyebrow">Sisters by Heart</p>
+        <h1>Single Ventricle Clinical Trial Finder</h1>
+        <p class="lede">
+          Explore studies that are recruiting now or preparing to recruit people
+          with single ventricle heart disease.
+        </p>
+      </div>
+      <a
+        id="expert-search-link"
+        class="button button-secondary"
+        href="https://clinicaltrials.gov/expert-search"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open on ClinicalTrials.gov
+      </a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="notice" aria-label="Important information">
+      <strong>Before you begin:</strong>
+      This page is for informational purposes and does not determine whether someone
+      is eligible for a study. Study teams make final eligibility decisions.
+      Always review the official ClinicalTrials.gov record and discuss participation
+      with your child's or your own healthcare team.
+    </section>
+
+    <section class="controls" aria-labelledby="filter-heading">
+      <div class="controls-heading">
+        <div>
+          <p class="eyebrow">Current opportunities</p>
+          <h2 id="filter-heading">Find a study that may fit your family</h2>
+        </div>
+        <button id="refresh-button" class="text-button" type="button">
+          Refresh studies
+        </button>
+      </div>
+
+      <div class="filter-grid">
+        <label>
+          <span>Search within results</span>
+          <input
+            id="text-filter"
+            type="search"
+            placeholder="e.g., Fontan, HLHS, exercise"
+            autocomplete="off"
+          />
+        </label>
+
+        <label>
+          <span>Age group</span>
+          <select id="age-filter">
+            <option value="">All ages</option>
+            <option value="CHILD">Children</option>
+            <option value="ADULT">Adults</option>
+            <option value="OLDER_ADULT">Older adults</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Recruitment status</span>
+          <select id="status-filter">
+            <option value="">All open studies</option>
+            <option value="RECRUITING">Recruiting now</option>
+            <option value="NOT_YET_RECRUITING">Opening soon</option>
+          </select>
+        </label>
+
+        <label>
+          <span>State / region</span>
+          <select id="state-filter">
+            <option value="">Any location</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section class="results-summary" aria-live="polite">
+      <div>
+        <strong id="result-count">Loading studies…</strong>
+        <span id="data-date"></span>
+      </div>
+      <button id="clear-filters" class="text-button" type="button">Clear filters</button>
+    </section>
+
+    <div id="loading" class="loading-card">
+      <div class="spinner" aria-hidden="true"></div>
+      <div>
+        <strong>Searching ClinicalTrials.gov</strong>
+        <p>We’re loading the latest matching studies.</p>
+      </div>
+    </div>
+
+    <div id="error" class="error-card" hidden>
+      <h2>We couldn’t load studies right now.</h2>
+      <p>
+        You can still open the same search directly on ClinicalTrials.gov using the
+        button above.
+      </p>
+    </div>
+
+    <section id="results" class="results" aria-label="Clinical trial results"></section>
+
+    <section class="about-search">
+      <h2>What this search includes</h2>
+      <p>
+        The search looks for single ventricle terminology and common diagnoses,
+        including hypoplastic left heart syndrome (HLHS), tricuspid atresia,
+        double inlet left ventricle, mitral atresia, unbalanced atrioventricular
+        canal defects, and pulmonary atresia with intact ventricular septum.
+        It also looks for studies described by the Norwood, Glenn, and Fontan
+        pathways.
+      </p>
+      <p>
+        Only studies listed as <strong>Recruiting</strong> or
+        <strong>Not yet recruiting</strong> are shown.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>
+        Study information is retrieved from
+        <a href="https://clinicaltrials.gov/" target="_blank" rel="noopener noreferrer">
+          ClinicalTrials.gov
+        </a>.
+      </p>
+    </div>
+  </footer>
+
+  <template id="study-template">
+    <article class="study-card">
+      <div class="card-topline">
+        <span class="status-badge"></span>
+        <span class="nct-id"></span>
+      </div>
+
+      <h2 class="study-title"></h2>
+
+      <div class="meta-row">
+        <span class="meta ages"></span>
+        <span class="meta study-type"></span>
+      </div>
+
+      <p class="summary"></p>
+
+      <div class="condition-section">
+        <h3>Who this study is about</h3>
+        <div class="condition-tags"></div>
+      </div>
+
+      <div class="location-section">
+        <h3>Where it is available</h3>
+        <p class="locations"></p>
+      </div>
+
+      <div class="card-actions">
+        <a class="button study-link" target="_blank" rel="noopener noreferrer">
+          View official study
+        </a>
+        <button class="button button-ghost details-toggle" type="button">
+          More details
+        </button>
+      </div>
+
+      <div class="details-panel" hidden>
+        <dl>
+          <div>
+            <dt>Enrollment</dt>
+            <dd class="enrollment"></dd>
+          </div>
+          <div>
+            <dt>Sex</dt>
+            <dd class="sex"></dd>
+          </div>
+          <div>
+            <dt>Study sponsor</dt>
+            <dd class="sponsor"></dd>
+          </div>
+        </dl>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
