@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://clinicaltrials.gov" />
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <header class="topbar">
@@ -161,7 +161,31 @@
         <span class="meta ages"></span>
         <span class="meta study-type"></span>
       </div>
-      <p class="summary"></p>
+      <section class="plain-language-section" aria-label="Plain-language study overview">
+        <div class="plain-language-heading">
+          <span class="plain-language-icon" aria-hidden="true">♡</span>
+          <div>
+            <p class="plain-language-label">Plain-language overview</p>
+            <h3>What is this study about?</h3>
+          </div>
+        </div>
+        <p class="plain-summary"></p>
+        <div class="plain-facts">
+          <div>
+            <span class="plain-fact-label">Who might this be for?</span>
+            <span class="plain-who"></span>
+          </div>
+          <div>
+            <span class="plain-fact-label">What is being studied?</span>
+            <span class="plain-what"></span>
+          </div>
+        </div>
+        <p class="plain-language-note">This overview is created automatically from information provided on ClinicalTrials.gov. See the official study record for complete details and eligibility criteria.</p>
+      </section>
+      <details class="official-summary">
+        <summary>Read the ClinicalTrials.gov description</summary>
+        <p class="summary"></p>
+      </details>
       <div class="condition-section">
         <h3>Who this study is about</h3>
         <div class="condition-tags"></div>
@@ -184,6 +208,6 @@
     </article>
   </template>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

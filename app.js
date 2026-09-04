@@ -122,6 +122,7 @@ function normalizeStudy(study) {
   const cond = getModule(study, "conditionsModule");
   const elig = getModule(study, "eligibilityModule");
   const design = getModule(study, "designModule");
+  const arms = getModule(study, "armsInterventionsModule");
   const contacts = getModule(study, "contactsLocationsModule");
   const sponsor = getModule(study, "sponsorCollaboratorsModule");
 
@@ -155,12 +156,72 @@ function normalizeStudy(study) {
     ages: Array.isArray(elig.stdAges) ? elig.stdAges.filter(Boolean) : [],
     sex: elig.sex || "ALL",
     studyType: design.studyType || "",
+    primaryPurpose: design.designInfo?.primaryPurpose || "",
+    phases: Array.isArray(design.phases) ? design.phases.filter(Boolean) : [],
+    interventions: Array.isArray(arms.interventions) ? arms.interventions.filter(Boolean) : [],
+    minAge: elig.minimumAge || "",
+    maxAge: elig.maximumAge || "",
+    healthyVolunteers: elig.healthyVolunteers,
     enrollment: design.enrollmentInfo?.count ?? null,
     sponsor: sponsor.leadSponsor?.name || "Not listed",
     locations,
     states,
     searchable,
   };
+}
+
+
+function friendlyList(items, max = 3) {
+  const clean = [...new Set((items || []).map(cleanText).filter(Boolean))];
+  if (!clean.length) return "";
+  if (clean.length <= max) return clean.join(", ");
+  return `${clean.slice(0, max).join(", ")}, and other related conditions`;
+}
+
+function ageRangeText(study) {
+  const min = cleanText(study.minAge);
+  const max = cleanText(study.maxAge);
+  if (min && max) return `people ages ${min} to ${max}`;
+  if (min) return `people age ${min} and older`;
+  if (max) return `people up to age ${max}`;
+  if (study.ages.length) return study.ages.map(humanizeEnum).join(" and ").toLowerCase();
+  return "people who meet the study's eligibility requirements";
+}
+
+function interventionText(study) {
+  const names = study.interventions.map((i) => cleanText(i.name)).filter(Boolean);
+  if (names.length) return friendlyList(names, 3);
+  if (study.studyType === "OBSERVATIONAL") return "Researchers are observing health information and outcomes rather than assigning a study treatment.";
+  return "The specific intervention or approach is described in the official study record.";
+}
+
+function plainLanguageSummary(study) {
+  const condition = friendlyList(study.conditions, 2);
+  const interventionNames = study.interventions.map((i) => cleanText(i.name)).filter(Boolean);
+  const purpose = study.primaryPurpose ? humanizeEnum(study.primaryPurpose).toLowerCase() : "";
+
+  if (study.studyType === "OBSERVATIONAL") {
+    return condition
+      ? `Researchers are collecting information about people with ${condition} to learn more about their health, care, or outcomes over time. No study treatment is assigned as part of this observational study.`
+      : `Researchers are collecting health information to learn more about care and outcomes over time. No study treatment is assigned as part of this observational study.`;
+  }
+
+  if (interventionNames.length) {
+    const what = friendlyList(interventionNames, 2);
+    if (condition && purpose) return `Researchers are studying ${what} in people with ${condition}. The main purpose of the study is ${purpose}.`;
+    if (condition) return `Researchers are studying ${what} in people with ${condition} to learn more about its effects.`;
+    return `Researchers are studying ${what} to learn more about its effects.`;
+  }
+
+  if (condition) return `Researchers are studying people with ${condition} to answer questions about their health, treatment, or care.`;
+  return `Researchers are conducting this study to answer questions about health, treatment, or care in people who meet the study criteria.`;
+}
+
+function whoMightFit(study) {
+  const age = ageRangeText(study);
+  const conditions = friendlyList(study.conditions, 2);
+  if (conditions) return `${age} with ${conditions}. Other eligibility requirements also apply.`;
+  return `${age}. Other eligibility requirements also apply.`;
 }
 
 function locationText(study) {
@@ -251,7 +312,10 @@ function render() {
       fragment.querySelector(".study-type").textContent =
         study.studyType ? humanizeEnum(study.studyType) : "Study type not listed";
 
-      fragment.querySelector(".summary").textContent = truncate(study.summary);
+      fragment.querySelector(".plain-summary").textContent = plainLanguageSummary(study);
+      fragment.querySelector(".plain-who").textContent = whoMightFit(study);
+      fragment.querySelector(".plain-what").textContent = interventionText(study);
+      fragment.querySelector(".summary").textContent = cleanText(study.summary);
 
       const tags = fragment.querySelector(".condition-tags");
       const conditions = study.conditions.slice(0, 8);
