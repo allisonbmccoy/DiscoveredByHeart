@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://clinicaltrials.gov" />
-  <link rel="stylesheet" href="styles.css?v=7" />
+  <link rel="stylesheet" href="styles.css?v=8" />
 </head>
 <body>
   <header class="topbar">
@@ -54,6 +54,38 @@
           This resource is for informational purposes and does not determine whether someone is eligible for a study. Study teams make final eligibility decisions. Always review the official ClinicalTrials.gov record and discuss participation with your child's or your own healthcare team.
         </p>
       </div>
+    </section>
+
+    <section class="fit-checker" aria-labelledby="fit-checker-heading">
+      <div class="fit-checker-copy">
+        <p class="eyebrow">Start here</p>
+        <h2 id="fit-checker-heading">Check for studies that may fit</h2>
+        <p>Answer two quick questions to hide studies with a definite age or sex mismatch. Your answers stay in this browser and are not saved or sent anywhere.</p>
+      </div>
+      <form id="fit-checker-form" class="fit-checker-form">
+        <label>
+          <span>Patient's age</span>
+          <div class="age-input-group">
+            <input id="fit-age" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Age" aria-label="Patient's age" />
+            <select id="fit-age-unit" aria-label="Age unit">
+              <option value="YEARS">Years</option>
+              <option value="MONTHS">Months</option>
+              <option value="WEEKS">Weeks</option>
+              <option value="DAYS">Days</option>
+            </select>
+          </div>
+        </label>
+        <label>
+          <span>Sex listed in the medical record</span>
+          <select id="fit-sex">
+            <option value="">Prefer not to say</option>
+            <option value="FEMALE">Female</option>
+            <option value="MALE">Male</option>
+          </select>
+        </label>
+        <button class="button button-primary" type="submit">Show studies that may fit</button>
+      </form>
+      <div id="fit-checker-result" class="fit-checker-result" role="status" aria-live="polite" hidden></div>
     </section>
 
     <section class="controls" aria-labelledby="filter-heading">
@@ -157,6 +189,7 @@
       <div class="card-topline">
         <span class="status-badge"></span>
         <span class="nct-id"></span>
+        <span class="fit-badge" hidden></span>
       </div>
       <h2 class="study-title"></h2>
       <div class="meta-row">
@@ -248,6 +281,6 @@
     </article>
   </template>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

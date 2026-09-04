@@ -133,6 +133,19 @@ h1 span { color: var(--pink); }
 .notice strong { font-family: "Varela Round", sans-serif; font-size: 1.02rem; }
 .notice p { margin: 3px 0 0; color: var(--muted); }
 
+.fit-checker {
+  margin: 0 0 30px; padding: 28px; border-radius: var(--radius); background: var(--dark-blue); color: #fff;
+  display: grid; grid-template-columns: minmax(250px, .9fr) minmax(420px, 1.4fr); gap: 26px; align-items: end;
+}
+.fit-checker h2 { margin: 0; color: #fff; font-size: 1.65rem; }
+.fit-checker-copy > p:last-child { margin: 9px 0 0; color: #dce5f2; font-size: .9rem; }
+.fit-checker-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+.fit-checker-form label > span { color: #fff; }
+.age-input-group { display: grid; grid-template-columns: 1fr 1.15fr; gap: 7px; }
+.fit-checker-result { grid-column: 1 / -1; padding: 14px 16px; border-radius: 10px; background: #fff; color: var(--dark-blue); }
+.fit-checker-result.error { background: #fff1f3; color: #8c2940; }
+.fit-checker-result .text-button { margin-left: 7px; }
+
 .controls {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -187,6 +200,9 @@ input:focus, select:focus, button:focus, a:focus {
 .status-badge.recruiting { background: var(--success-bg); color: var(--success-ink); }
 .status-badge.soon { background: var(--soon-bg); color: var(--soon-ink); }
 .nct-id { font-size: 0.82rem; color: var(--muted); font-weight: 700; }
+.fit-badge { margin-left: auto; padding: 4px 9px; border-radius: 999px; font-size: .72rem; font-weight: 800; }
+.fit-badge.match { background: var(--success-bg); color: var(--success-ink); }
+.fit-badge.review { background: #fff7df; color: #75570a; }
 .study-title { margin: 0; font-size: 1.55rem; }
 .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 13px 0 16px; }
 .meta {
@@ -276,6 +292,9 @@ footer a { color: #fff; }
   .filter-grid { grid-template-columns: 1fr 1fr; }
   .details-panel dl { grid-template-columns: 1fr; }
   .criteria-grid { grid-template-columns: 1fr; }
+  .fit-checker { grid-template-columns: 1fr; }
+  .fit-checker-form { grid-template-columns: 1fr 1fr; }
+  .fit-checker-form .button { grid-column: 1 / -1; }
 }
 
 @media (max-width: 560px) {
@@ -286,6 +305,9 @@ footer a { color: #fff; }
   .resource-label { display: none; }
   .hero-inner { padding: 42px 0; }
   .filter-grid { grid-template-columns: 1fr; }
+  .fit-checker { padding: 20px; }
+  .fit-checker-form { grid-template-columns: 1fr; }
+  .fit-checker-form .button { grid-column: auto; }
   .distance-tools { align-items: flex-start; flex-direction: column; }
   .controls, .study-card { padding: 20px; }
   .controls-heading, .results-summary, .footer-inner { align-items: flex-start; flex-direction: column; }

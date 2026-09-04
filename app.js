@@ -51,6 +51,7 @@ AREA[OverallStatus](
 
 let allStudies = [];
 let userLocation = null;
+let fitProfile = null;
 
 const els = {
   results: document.querySelector("#results"),
@@ -68,6 +69,11 @@ const els = {
   refresh: document.querySelector("#refresh-button"),
   expertLink: document.querySelector("#expert-search-link"),
   template: document.querySelector("#study-template"),
+  fitForm: document.querySelector("#fit-checker-form"),
+  fitAge: document.querySelector("#fit-age"),
+  fitAgeUnit: document.querySelector("#fit-age-unit"),
+  fitSex: document.querySelector("#fit-sex"),
+  fitResult: document.querySelector("#fit-checker-result"),
 };
 
 function expertSearchUrl() {
@@ -194,6 +200,33 @@ function normalizeStudy(study) {
     ]),
     searchable,
   };
+}
+
+const AGE_UNIT_DAYS = { DAYS: 1, WEEKS: 7, MONTHS: 30.4375, YEARS: 365.25 };
+
+function ageInDays(value) {
+  const match = String(value || "").trim().match(/^([\d.]+)\s+(Days?|Weeks?|Months?|Years?)$/i);
+  if (!match) return null;
+  const unit = `${match[2].replace(/s$/i, "").toUpperCase()}S`;
+  const days = Number(match[1]) * AGE_UNIT_DAYS[unit];
+  return Number.isFinite(days) ? days : null;
+}
+
+function basicFit(study) {
+  if (!fitProfile) return { matches: true, unknown: false };
+  let unknown = false;
+  const patientAgeDays = fitProfile.age * AGE_UNIT_DAYS[fitProfile.ageUnit];
+  const minDays = ageInDays(study.minAge);
+  const maxDays = ageInDays(study.maxAge);
+
+  if (minDays != null && patientAgeDays < minDays) return { matches: false, unknown: false };
+  if (maxDays != null && patientAgeDays > maxDays) return { matches: false, unknown: false };
+  if (minDays == null || maxDays == null) unknown = true;
+  if (fitProfile.sex && study.sex && study.sex !== "ALL" && study.sex !== fitProfile.sex) {
+    return { matches: false, unknown: false };
+  }
+  if (fitProfile.sex && !study.sex) unknown = true;
+  return { matches: true, unknown };
 }
 
 function pathwayTags(values) {
@@ -489,7 +522,8 @@ function filteredStudies() {
     const ageOk = !age || study.ages.includes(age);
     const statusOk = !status || study.status === status;
     const stateOk = !state || study.states.includes(state);
-    return textOk && ageOk && statusOk && stateOk;
+    const fitOk = basicFit(study).matches;
+    return textOk && ageOk && statusOk && stateOk && fitOk;
   });
   if (userLocation) {
     studies.sort((a, b) => (nearestOpenLocation(a)?.distance ?? Infinity) - (nearestOpenLocation(b)?.distance ?? Infinity));
@@ -527,6 +561,13 @@ function render() {
       badge.classList.add(study.status === "RECRUITING" ? "recruiting" : "soon");
 
       fragment.querySelector(".nct-id").textContent = study.nctId || "ClinicalTrials.gov study";
+      const fitBadge = fragment.querySelector(".fit-badge");
+      if (fitProfile) {
+        const fit = basicFit(study);
+        fitBadge.hidden = false;
+        fitBadge.textContent = fit.unknown ? "Basic fit needs review" : "Basic criteria match";
+        fitBadge.classList.add(fit.unknown ? "review" : "match");
+      }
       fragment.querySelector(".study-title").textContent = study.title;
 
       fragment.querySelector(".ages").textContent =
@@ -687,10 +728,38 @@ function clearFilters() {
   els.status.value = "";
   els.state.value = "";
   userLocation = null;
+  fitProfile = null;
+  els.fitForm.reset();
+  els.fitResult.hidden = true;
   els.nearMe.textContent = "Find studies near me";
   els.locationStatus.textContent = "";
   render();
 }
+
+els.fitForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const age = Number(els.fitAge.value);
+  if (!els.fitAge.value || !Number.isFinite(age) || age < 0) {
+    els.fitResult.hidden = false;
+    els.fitResult.className = "fit-checker-result error";
+    els.fitResult.textContent = "Enter the patient's age to check for a basic match.";
+    els.fitAge.focus();
+    return;
+  }
+  fitProfile = { age, ageUnit: els.fitAgeUnit.value, sex: els.fitSex.value };
+  render();
+  const matches = filteredStudies().length;
+  els.fitResult.hidden = false;
+  els.fitResult.className = "fit-checker-result";
+  els.fitResult.innerHTML = `<strong>${matches} stud${matches === 1 ? "y" : "ies"} may fit these basic details.</strong> This is only a first screen. Diagnosis, medical history, tests, and other criteria still need review by the study team. <button type="button" class="text-button" id="clear-fit-check">Show all studies</button>`;
+  document.querySelector("#clear-fit-check").addEventListener("click", () => {
+    fitProfile = null;
+    els.fitForm.reset();
+    els.fitResult.hidden = true;
+    render();
+  });
+  els.results.scrollIntoView({ behavior: "smooth", block: "start" });
+});
 
 function findStudiesNearMe() {
   if (userLocation) {
