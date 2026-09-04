@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://clinicaltrials.gov" />
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=7" />
 </head>
 <body>
   <header class="topbar">
@@ -97,6 +97,10 @@
           </select>
         </label>
       </div>
+      <div class="distance-tools">
+        <button id="near-me-button" class="button button-ghost" type="button">Find studies near me</button>
+        <p id="location-status" role="status" aria-live="polite"></p>
+      </div>
     </section>
 
     <section class="results-summary" aria-live="polite">
@@ -159,6 +163,7 @@
         <span class="meta ages"></span>
         <span class="meta study-type"></span>
       </div>
+      <p class="study-format"></p>
       <section class="plain-language-section" aria-label="Plain-language study overview">
         <div class="plain-language-heading">
           <span class="plain-language-icon" aria-hidden="true">♡</span>
@@ -203,11 +208,19 @@
       </div>
       <div class="location-section">
         <h3>Where it is available</h3>
+        <p class="nearest-location"></p>
         <p class="locations"></p>
       </div>
       <div class="card-actions">
         <a class="button button-primary study-link" target="_blank" rel="noopener noreferrer">View official study</a>
         <button class="button button-ghost details-toggle" type="button">More details</button>
+        <button class="button button-ghost contact-toggle" type="button">Contact study team</button>
+      </div>
+      <div class="contact-panel" hidden>
+        <h3>Study contact</h3>
+        <p class="contact-context"></p>
+        <div class="contact-list"></div>
+        <p class="contact-note">Ask about current enrollment, eligibility, required visits, travel support, and whether any participation can happen remotely. Contact information is supplied by the study team and may change.</p>
       </div>
       <div class="details-panel" hidden>
         <dl>
@@ -218,10 +231,23 @@
           <div><dt>Recruiting / open locations</dt><dd class="open-locations"></dd></div>
           <div><dt>Record last updated</dt><dd class="last-updated"></dd></div>
         </dl>
+        <section class="participation-section">
+          <h3>Key participation criteria from the registry</h3>
+          <p class="eligibility-warning">These selected criteria can help you decide what to ask about. They do not determine eligibility.</p>
+          <div class="criteria-grid">
+            <div><h4>Selected inclusion criteria</h4><ul class="inclusion-list"></ul></div>
+            <div><h4>Selected exclusion criteria</h4><ul class="exclusion-list"></ul></div>
+          </div>
+          <p class="healthy-volunteers"></p>
+          <details class="full-eligibility-details">
+            <summary>Read all eligibility criteria from ClinicalTrials.gov</summary>
+            <p class="full-eligibility"></p>
+          </details>
+        </section>
       </div>
     </article>
   </template>
 
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

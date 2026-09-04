@@ -154,6 +154,9 @@ h1 span { color: var(--pink); }
   gap: 14px;
   margin-top: 24px;
 }
+.distance-tools { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+.distance-tools .button { min-height: 42px; }
+#location-status { margin: 0; color: var(--muted); font-size: .84rem; }
 label span { display: block; margin-bottom: 7px; font-weight: 700; font-size: 0.88rem; }
 input, select {
   width: 100%; min-height: 48px; border: 1px solid #cbdde4; border-radius: 10px;
@@ -190,6 +193,7 @@ input:focus, select:focus, button:focus, a:focus {
   display: inline-flex; padding: 5px 9px; border-radius: 7px; background: var(--light-blue);
   font-size: 0.8rem; font-weight: 700; color: var(--dark-blue);
 }
+.study-format { margin: -4px 0 16px; color: #3f4b68; font-size: .9rem; }
 .summary { margin: 0; color: #38425f; }
 .condition-section, .location-section, .pathway-section { margin-top: 20px; }
 .condition-section h3, .location-section h3, .pathway-section h3 {
@@ -204,6 +208,7 @@ input:focus, select:focus, button:focus, a:focus {
 .pathway-tags { display: flex; flex-wrap: wrap; gap: 7px; }
 .pathway-tags span { background: var(--light-blue); border-color: #c8e5ee; }
 .locations { margin: 0; color: #38425f; }
+.nearest-location { margin: 0 0 6px; color: #087b92; font-weight: 700; }
 .card-actions { justify-content: flex-start; margin-top: 23px; }
 
 .button {
@@ -222,6 +227,21 @@ input:focus, select:focus, button:focus, a:focus {
 .details-panel dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 0; }
 .details-panel dt { font-size: 0.78rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
 .details-panel dd { margin: 4px 0 0; font-weight: 700; }
+.contact-panel { margin-top: 18px; padding: 18px; border-radius: 12px; background: #fff7f8; border: 1px solid rgba(247, 80, 106, .2); }
+.contact-panel h3, .participation-section h3 { margin: 0; font-size: 1rem; }
+.contact-context { margin: 4px 0 12px; color: var(--muted); font-size: .86rem; }
+.contact-list { display: grid; gap: 12px; }
+.contact-item { padding: 12px; border-radius: 9px; background: #fff; }
+.contact-item p { margin: 4px 0 0; }
+.contact-note, .eligibility-warning { margin: 12px 0 0; color: var(--muted); font-size: .8rem; }
+.participation-section { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); }
+.criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 14px; }
+.criteria-grid h4 { margin: 0 0 7px; font-size: .85rem; }
+.criteria-grid ul { margin: 0; padding-left: 20px; color: #38425f; }
+.criteria-grid li + li { margin-top: 5px; }
+.healthy-volunteers { font-weight: 700; }
+.full-eligibility-details summary { cursor: pointer; color: #087b92; font-weight: 700; }
+.full-eligibility { color: #38425f; line-height: 1.65; }
 
 .loading-card, .error-card, .empty-card {
   display: flex; gap: 14px; align-items: center; margin: 18px 0; padding: 22px;
@@ -255,6 +275,7 @@ footer a { color: #fff; }
   .hero-inner { align-items: flex-start; flex-direction: column; padding: 48px 0; }
   .filter-grid { grid-template-columns: 1fr 1fr; }
   .details-panel dl { grid-template-columns: 1fr; }
+  .criteria-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
@@ -265,6 +286,7 @@ footer a { color: #fff; }
   .resource-label { display: none; }
   .hero-inner { padding: 42px 0; }
   .filter-grid { grid-template-columns: 1fr; }
+  .distance-tools { align-items: flex-start; flex-direction: column; }
   .controls, .study-card { padding: 20px; }
   .controls-heading, .results-summary, .footer-inner { align-items: flex-start; flex-direction: column; }
   .card-actions { align-items: stretch; flex-direction: column; }
