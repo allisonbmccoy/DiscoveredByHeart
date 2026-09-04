@@ -191,16 +191,18 @@ input:focus, select:focus, button:focus, a:focus {
   font-size: 0.8rem; font-weight: 700; color: var(--dark-blue);
 }
 .summary { margin: 0; color: #38425f; }
-.condition-section, .location-section { margin-top: 20px; }
-.condition-section h3, .location-section h3 {
+.condition-section, .location-section, .pathway-section { margin-top: 20px; }
+.condition-section h3, .location-section h3, .pathway-section h3 {
   margin: 0 0 8px; font-family: "Inter", sans-serif; font-size: 0.8rem; font-weight: 800;
   text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
 }
 .condition-tags { display: flex; flex-wrap: wrap; gap: 7px; }
-.condition-tags span {
+.condition-tags span, .pathway-tags span {
   display: inline-flex; padding: 5px 9px; border-radius: 999px; background: #fff0f3;
   border: 1px solid rgba(247, 80, 106, 0.16); color: var(--dark-blue); font-size: 0.78rem; font-weight: 600;
 }
+.pathway-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.pathway-tags span { background: var(--light-blue); border-color: #c8e5ee; }
 .locations { margin: 0; color: #38425f; }
 .card-actions { justify-content: flex-start; margin-top: 23px; }
 
@@ -290,4 +292,6 @@ footer a { color: #fff; }
 .official-summary { margin: 0 0 20px; border-bottom: 1px solid var(--border); padding-bottom: 18px; }
 .official-summary summary { cursor: pointer; color: #087b92; font-weight: 700; font-size: .88rem; }
 .official-summary .summary { margin-top: 12px; line-height: 1.65; }
+.official-description-content { display: grid; gap: 16px; margin-top: 12px; }
+.official-description-content h4 { margin: 0; color: var(--muted); font-size: .76rem; letter-spacing: .04em; text-transform: uppercase; }
 @media (max-width: 700px) { .plain-facts { grid-template-columns: 1fr; } }

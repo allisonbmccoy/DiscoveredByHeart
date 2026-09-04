@@ -127,6 +127,9 @@ function normalizeStudy(study) {
   const sponsor = getModule(study, "sponsorCollaboratorsModule");
 
   const locations = Array.isArray(contacts.locations) ? contacts.locations.filter(Boolean) : [];
+  const recruitingLocations = locations.filter(
+    (location) => location.status === "RECRUITING" || location.status === "NOT_YET_RECRUITING"
+  );
   const states = [...new Set(
     locations
       .map((loc) => loc.state || loc.country)
@@ -138,8 +141,11 @@ function normalizeStudy(study) {
     id.briefTitle,
     id.officialTitle,
     desc.briefSummary,
+    desc.detailedDescription,
+    elig.eligibilityCriteria,
     ...(cond.conditions || []),
     ...(cond.keywords || []),
+    ...(arms.interventions || []).flatMap((intervention) => [intervention.name, intervention.description]),
     ...locations.flatMap((l) => [l.facility, l.city, l.state, l.country]),
   ]
     .filter(Boolean)
@@ -151,7 +157,9 @@ function normalizeStudy(study) {
     nctId: id.nctId || "",
     title: id.briefTitle || id.officialTitle || "Untitled study",
     status: status.overallStatus || "",
-    summary: desc.briefSummary || "A brief study summary is not available.",
+    summary: desc.briefSummary || "",
+    detailedDescription: desc.detailedDescription || "",
+    eligibilityCriteria: elig.eligibilityCriteria || "",
     conditions: Array.isArray(cond.conditions) ? cond.conditions.filter(Boolean) : [],
     ages: Array.isArray(elig.stdAges) ? elig.stdAges.filter(Boolean) : [],
     sex: elig.sex || "ALL",
@@ -165,9 +173,34 @@ function normalizeStudy(study) {
     enrollment: design.enrollmentInfo?.count ?? null,
     sponsor: sponsor.leadSponsor?.name || "Not listed",
     locations,
+    recruitingLocations,
     states,
+    lastUpdated: status.lastUpdatePostDateStruct?.date || status.lastUpdateSubmitDate || "",
+    pathwayTags: pathwayTags([
+      id.briefTitle,
+      id.officialTitle,
+      desc.briefSummary,
+      desc.detailedDescription,
+      elig.eligibilityCriteria,
+      ...(cond.keywords || []),
+      ...(arms.interventions || []).flatMap((intervention) => [
+        intervention.name,
+        intervention.description,
+      ]),
+    ]),
     searchable,
   };
+}
+
+function pathwayTags(values) {
+  const text = (values || []).filter(Boolean).join(" ");
+  const supportedTags = [
+    ["Norwood", /\bnorwood\b/i],
+    ["Interstage", /\binterstage\b/i],
+    ["Glenn", /\bglenn\b/i],
+    ["Fontan", /\bfontan\b/i],
+  ];
+  return supportedTags.filter(([, pattern]) => pattern.test(text)).map(([label]) => label);
 }
 
 
@@ -196,39 +229,70 @@ function interventionText(study) {
 }
 
 function plainLanguageSummary(study) {
-  const condition = friendlyList(study.conditions, 2);
-  const interventionNames = study.interventions.map((i) => cleanText(i.name)).filter(Boolean);
-  const purpose = study.primaryPurpose ? humanizeEnum(study.primaryPurpose).toLowerCase() : "";
+  const summary = cleanText(study.summary);
+  if (!summary) return "ClinicalTrials.gov does not provide a brief summary for this study.";
 
-  if (study.studyType === "OBSERVATIONAL") {
-    return condition
-      ? `Researchers are collecting information about people with ${condition} to learn more about their health, care, or outcomes over time. No study treatment is assigned as part of this observational study.`
-      : `Researchers are collecting health information to learn more about care and outcomes over time. No study treatment is assigned as part of this observational study.`;
-  }
-
-  if (interventionNames.length) {
-    const what = friendlyList(interventionNames, 2);
-    if (condition && purpose) return `Researchers are studying ${what} in people with ${condition}. The main purpose of the study is ${purpose}.`;
-    if (condition) return `Researchers are studying ${what} in people with ${condition} to learn more about its effects.`;
-    return `Researchers are studying ${what} to learn more about its effects.`;
-  }
-
-  if (condition) return `Researchers are studying people with ${condition} to answer questions about their health, treatment, or care.`;
-  return `Researchers are conducting this study to answer questions about health, treatment, or care in people who meet the study criteria.`;
+  // Keep the registry's meaning intact while making common purpose-style openings
+  // read naturally as a complete, family-facing sentence.
+  const purposeOpenings = [
+    [/^to compare\b/i, "This study compares"],
+    [/^to evaluate\b/i, "This study evaluates"],
+    [/^to assess\b/i, "This study assesses"],
+    [/^to determine\b/i, "This study aims to determine"],
+    [/^to investigate\b/i, "This study investigates"],
+    [/^to examine\b/i, "This study examines"],
+    [/^to describe\b/i, "This study describes"],
+  ];
+  const opening = purposeOpenings.find(([pattern]) => pattern.test(summary));
+  const familySummary = opening ? summary.replace(opening[0], opening[1]) : summary;
+  return truncate(familySummary, 520);
 }
 
 function whoMightFit(study) {
   const age = ageRangeText(study);
-  const conditions = friendlyList(study.conditions, 2);
-  if (conditions) return `${age} with ${conditions}. Other eligibility requirements also apply.`;
-  return `${age}. Other eligibility requirements also apply.`;
+  const relevantCriteria = eligibilityHighlights(study.eligibilityCriteria);
+  const highlights = relevantCriteria.length ? ` Registry criteria also mention ${sentenceList(relevantCriteria)}.` : "";
+  return `This study lists ${age}.${highlights} The study team determines eligibility; other requirements also apply.`;
+}
+
+function eligibilityHighlights(criteria) {
+  const cleaned = String(criteria || "").replace(/\r/g, "").trim();
+  if (!cleaned) return [];
+
+  const inclusionOnly = cleaned
+    .split(/^\s*exclusion criteria:?\s*$/im)[0]
+    .replace(/^\s*inclusion criteria:?\s*$/gim, "");
+  const relevant = /single[- ]ventricle|norwood|interstage|glenn|fontan|cardiac catheter/i;
+  return [...new Set(
+    inclusionOnly
+      .split(/\n+|;\s+/)
+      .map((line) => cleanText(line.replace(/^[-•*]+\s*/, "")).replace(/[.;]+$/, ""))
+      .filter((line) => line && relevant.test(line))
+  )].slice(0, 3);
+}
+
+function sentenceList(items) {
+  const clean = [...new Set((items || []).map(cleanText).filter(Boolean))];
+  if (clean.length < 2) return clean[0] || "";
+  if (clean.length === 2) return `${clean[0]} and ${clean[1]}`;
+  return `${clean.slice(0, -1).join(", ")}, and ${clean.at(-1)}`;
+}
+
+function phaseText(study) {
+  if (!study.phases.length) return "Not listed";
+  return study.phases.map((phase) => phase === "NA" ? "Not applicable" : humanizeEnum(phase)).join(" · ");
+}
+
+function formatRecordDate(value) {
+  if (!value) return "Not listed";
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime())
+    ? cleanText(value)
+    : date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
 
 function locationText(study) {
-  const recruitingLocations = study.locations.filter(
-    (loc) => !loc.status || loc.status === "RECRUITING" || loc.status === "NOT_YET_RECRUITING"
-  );
-  const locations = recruitingLocations.length ? recruitingLocations : study.locations;
+  const locations = study.recruitingLocations.length ? study.recruitingLocations : study.locations;
 
   if (!locations.length) return "No site locations are listed yet.";
 
@@ -315,7 +379,27 @@ function render() {
       fragment.querySelector(".plain-summary").textContent = plainLanguageSummary(study);
       fragment.querySelector(".plain-who").textContent = whoMightFit(study);
       fragment.querySelector(".plain-what").textContent = interventionText(study);
-      fragment.querySelector(".summary").textContent = cleanText(study.summary);
+      fragment.querySelector(".official-brief-summary").textContent =
+        cleanText(study.summary) || "A brief summary is not available.";
+      const detailedDescription = fragment.querySelector(".official-detailed-description");
+      const detailedDescriptionBlock = fragment.querySelector(".official-detailed-block");
+      if (study.detailedDescription) {
+        detailedDescription.textContent = cleanText(study.detailedDescription);
+      } else {
+        detailedDescriptionBlock.hidden = true;
+      }
+
+      const pathwayTagsContainer = fragment.querySelector(".pathway-tags");
+      const pathwaySection = fragment.querySelector(".pathway-section");
+      if (study.pathwayTags.length) {
+        study.pathwayTags.forEach((tag) => {
+          const span = document.createElement("span");
+          span.textContent = tag;
+          pathwayTagsContainer.append(span);
+        });
+      } else {
+        pathwaySection.hidden = true;
+      }
 
       const tags = fragment.querySelector(".condition-tags");
       const conditions = study.conditions.slice(0, 8);
@@ -348,6 +432,9 @@ function render() {
         study.sex === "ALL" ? "All sexes" : humanizeEnum(study.sex);
 
       fragment.querySelector(".sponsor").textContent = study.sponsor;
+      fragment.querySelector(".phase").textContent = phaseText(study);
+      fragment.querySelector(".open-locations").textContent = study.recruitingLocations.length.toLocaleString();
+      fragment.querySelector(".last-updated").textContent = formatRecordDate(study.lastUpdated);
 
       const toggle = fragment.querySelector(".details-toggle");
       const panel = fragment.querySelector(".details-panel");
@@ -406,13 +493,13 @@ async function loadStudies() {
     });
 
     populateStateFilter();
-    els.error.hidden = true;
-    els.loading.hidden = true;
     render();
 
     if (allStudies.length && !els.results.children.length) {
       throw new Error("Studies were returned but could not be displayed.");
     }
+    els.error.hidden = true;
+    els.loading.hidden = true;
   } catch (error) {
     console.error(error);
     els.loading.hidden = true;
