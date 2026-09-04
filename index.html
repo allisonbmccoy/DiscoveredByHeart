@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Varela+Round&display=swap" rel="stylesheet" />
   <link rel="preconnect" href="https://clinicaltrials.gov" />
-  <link rel="stylesheet" href="styles.css?v=5" />
+  <link rel="stylesheet" href="styles.css?v=6" />
 </head>
 <body>
   <header class="topbar">
@@ -182,10 +182,23 @@
       </section>
       <details class="official-summary">
         <summary>Read the ClinicalTrials.gov description</summary>
-        <p class="summary"></p>
+        <div class="official-description-content">
+          <div>
+            <h4>Brief summary</h4>
+            <p class="summary official-brief-summary"></p>
+          </div>
+          <div class="official-detailed-block">
+            <h4>Detailed description</h4>
+            <p class="summary official-detailed-description"></p>
+          </div>
+        </div>
       </details>
+      <div class="pathway-section" aria-label="Single ventricle pathways named in the study record">
+        <h3>Single ventricle pathway terms in this record</h3>
+        <div class="pathway-tags"></div>
+      </div>
       <div class="condition-section">
-        <h3>Who this study is about</h3>
+        <h3>Conditions listed on ClinicalTrials.gov</h3>
         <div class="condition-tags"></div>
       </div>
       <div class="location-section">
@@ -201,11 +214,14 @@
           <div><dt>Enrollment</dt><dd class="enrollment"></dd></div>
           <div><dt>Sex</dt><dd class="sex"></dd></div>
           <div><dt>Study sponsor</dt><dd class="sponsor"></dd></div>
+          <div><dt>Study phase</dt><dd class="phase"></dd></div>
+          <div><dt>Recruiting / open locations</dt><dd class="open-locations"></dd></div>
+          <div><dt>Record last updated</dt><dd class="last-updated"></dd></div>
         </dl>
       </div>
     </article>
   </template>
 
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>
