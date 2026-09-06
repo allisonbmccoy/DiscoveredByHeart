@@ -63,9 +63,9 @@ function reviewedDateLabel(value) {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return "";
   const date = new Date(`${value}T00:00:00Z`);
   if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) return "";
-  return `Reviewed ${date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString("en-US", {
     month: "long", year: "numeric", timeZone: "UTC",
-  })}`;
+  });
 }
 
 function curatedFields(nctId) {
@@ -85,9 +85,6 @@ function addCuratedSummary(card, nctId) {
   const section = document.createElement("section");
   section.className = "curated-summary";
   section.setAttribute("aria-label", "Sisters by Heart summary");
-  const heading = document.createElement("h3");
-  heading.textContent = "Sisters by Heart summary";
-  section.append(heading);
   const list = document.createElement("dl");
   fields.forEach(([key, label]) => {
     const term = document.createElement("dt");
@@ -98,12 +95,10 @@ function addCuratedSummary(card, nctId) {
   });
   section.append(list);
   const reviewed = reviewedDateLabel(entry.reviewed_date);
-  if (reviewed) {
-    const date = document.createElement("p");
-    date.className = "curated-reviewed";
-    date.textContent = reviewed;
-    section.append(date);
-  }
+  const attribution = document.createElement("p");
+  attribution.className = "curated-reviewed";
+  attribution.textContent = `Reviewed by Sisters by Heart${reviewed ? ` · ${reviewed}` : ""}`;
+  section.append(attribution);
   card.querySelector(".plain-language-section").before(section);
 }
 

@@ -52,7 +52,9 @@ Example structure only (placeholder ID and text, not a real study summary):
 All five fields are optional. The four summary fields accept plain text and
 display under question headings; HTML is displayed as text. Blank or non-text
 fields are ignored. `reviewed_date` accepts a valid `YYYY-MM-DD` date and displays
-as, for example, “Reviewed September 2026.” Invalid dates are omitted. An entry
+in the attribution, for example, “Reviewed by Sisters by Heart · September 2026.”
+Without a valid date, the attribution is simply “Reviewed by Sisters by Heart.”
+The questions appear without a separate section title. An entry
 needs at least one nonblank summary field to display a section.
 
 Separate multiple NCT entries with commas; use double quotes and no trailing

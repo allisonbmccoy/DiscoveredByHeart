@@ -350,14 +350,7 @@ footer a { color: #fff; }
   overflow-wrap: anywhere;
 }
 
-.study-card .curated-summary h3 {
-  color: var(--dark-blue);
-  font-size: 1.05rem;
-  text-transform: none;
-  letter-spacing: normal;
-}
-
-.curated-summary dl { margin: 14px 0 0; }
+.curated-summary dl { margin: 0; }
 .curated-summary dt { font-weight: 700; }
 .curated-summary dd { margin: 4px 0 14px; white-space: pre-line; }
 .curated-summary dd:last-child { margin-bottom: 0; }
