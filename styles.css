@@ -530,15 +530,14 @@ input:focus, select:focus, button:focus, a:focus {
   padding: 20px;
   background: var(--light-blue);
   border: 1px solid #d7ebf2;
-  border-left: 4px solid var(--pink);
   border-radius: 14px;
   overflow-wrap: anywhere;
 }
 
 .curated-summary-heading {
   display: flex;
-  align-items: flex-start;
   gap: 10px;
+  align-items: flex-start;
   margin-bottom: 10px;
 }
 
@@ -549,12 +548,26 @@ input:focus, select:focus, button:focus, a:focus {
 }
 
 .curated-summary-label {
-  margin: 0;
+  margin: 0 0 2px;
   color: #087b92;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.curated-summary-heading h3 {
+  margin: 0;
+  color: var(--dark-blue);
+  font-family: "Varela Round", "Open Sans", sans-serif;
+  font-size: 1.08rem;
+  font-weight: 400;
+}
+
+.curated-summary-first {
+  margin: 0;
+  color: #273451;
+  line-height: 1.65;
 }
 
 .curated-summary dl {
@@ -564,15 +577,8 @@ input:focus, select:focus, button:focus, a:focus {
 .curated-summary dt {
   margin-top: 16px;
   color: var(--dark-blue);
-  font-weight: 700;
   font-size: 0.95rem;
-}
-
-.curated-summary dt:first-child {
-  margin-top: 0;
-  font-family: "Varela Round", "Open Sans", sans-serif;
-  font-size: 1.08rem;
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .curated-summary dd {
@@ -580,10 +586,6 @@ input:focus, select:focus, button:focus, a:focus {
   color: #273451;
   line-height: 1.65;
   white-space: pre-line;
-}
-
-.curated-summary dd + dt {
-  margin-top: 16px;
 }
 
 .summary-about {
