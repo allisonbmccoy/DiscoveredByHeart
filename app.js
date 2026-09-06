@@ -94,9 +94,8 @@ function addCuratedSummary(card, nctId) {
 
   const section = document.createElement("section");
   section.className = "curated-summary";
-  section.setAttribute("aria-label", "Study Summary");
+  section.setAttribute("aria-label", "Study summary");
 
-  // Build the heading to match the regular Study Overview.
   const heading = document.createElement("div");
   heading.className = "curated-summary-heading";
 
@@ -105,30 +104,16 @@ function addCuratedSummary(card, nctId) {
   icon.setAttribute("aria-hidden", "true");
   icon.textContent = "♡";
 
-  const headingText = document.createElement("div");
-
   const label = document.createElement("p");
   label.className = "curated-summary-label";
-  label.textContent = "Study Summary";
+  label.textContent = "Study summary";
 
-  const firstField = fields[0];
-
-  const firstHeading = document.createElement("h3");
-  firstHeading.textContent = firstField[1];
-
-  headingText.append(label, firstHeading);
-  heading.append(icon, headingText);
+  heading.append(icon, label);
   section.append(heading);
 
-  const firstDescription = document.createElement("p");
-  firstDescription.className = "curated-summary-first";
-  firstDescription.textContent = entry[firstField[0]].trim();
-  section.append(firstDescription);
-
-  // Add the remaining curated fields.
   const list = document.createElement("dl");
 
-  fields.slice(1).forEach(([key, label]) => {
+  fields.forEach(([key, label]) => {
     const term = document.createElement("dt");
     term.textContent = label;
 
@@ -145,6 +130,7 @@ function addCuratedSummary(card, nctId) {
   overview.before(section);
   overview.hidden = true;
 }
+
 function createSummaryAbout(entry) {
   const wrapper = document.createElement("div");
   wrapper.className = "summary-about";

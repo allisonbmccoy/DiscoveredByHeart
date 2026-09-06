@@ -495,7 +495,7 @@ input:focus, select:focus, button:focus, a:focus {
   .fit-checker-form .button { grid-column: auto; }
   .distance-tools { align-items: flex-start; flex-direction: column; }
   .controls, .study-card { padding: 20px; }
-  .controls-heading, .results-summary, { align-items: flex-start; flex-direction: column; }
+  .controls-heading, .results-summary { align-items: flex-start; flex-direction: column; }
   .card-actions { align-items: stretch; flex-direction: column; }
   .button { width: 100%; }
 }
@@ -538,7 +538,7 @@ input:focus, select:focus, button:focus, a:focus {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .curated-summary-icon {
@@ -560,29 +560,21 @@ input:focus, select:focus, button:focus, a:focus {
   text-transform: uppercase;
 }
 
-.curated-summary-heading h3 {
-  margin: 0;
-  color: var(--dark-blue);
-  font-family: "Open Sans", Arial, sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.curated-summary-first {
-  margin: 0;
-  color: #273451;
-  line-height: 1.65;
-}
-
 .curated-summary dl {
   margin: 0;
 }
 
 .curated-summary dt {
-  margin-top: 16px;
+  margin: 18px 0 0;
   color: var(--dark-blue);
+  font-family: "Open Sans", Arial, sans-serif;
   font-size: 0.95rem;
   font-weight: 700;
+  line-height: 1.4;
+}
+
+.curated-summary dt:first-child {
+  margin-top: 0;
 }
 
 .curated-summary dd {
@@ -595,7 +587,7 @@ input:focus, select:focus, button:focus, a:focus {
 .summary-about {
   position: relative;
   display: inline-block;
-  margin-top: 16px;
+  margin-top: 18px;
 }
 
 .summary-about-button {
