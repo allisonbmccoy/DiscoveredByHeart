@@ -56,43 +56,10 @@
       </div>
     </section>
 
-    <section class="fit-checker" aria-labelledby="fit-checker-heading">
-      <div class="fit-checker-copy">
-        <p class="eyebrow">Start here</p>
-        <h2 id="fit-checker-heading">Check for studies that may fit</h2>
-        <p>Answer two quick questions to hide studies with a definite age or sex mismatch. Your answers stay in this browser and are not saved or sent anywhere.</p>
-      </div>
-      <form id="fit-checker-form" class="fit-checker-form">
-        <label>
-          <span>Patient's age</span>
-          <div class="age-input-group">
-            <input id="fit-age" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Age" aria-label="Patient's age" />
-            <select id="fit-age-unit" aria-label="Age unit">
-              <option value="YEARS">Years</option>
-              <option value="MONTHS">Months</option>
-              <option value="WEEKS">Weeks</option>
-              <option value="DAYS">Days</option>
-            </select>
-          </div>
-        </label>
-        <label>
-          <span>Sex listed in the medical record</span>
-          <select id="fit-sex">
-            <option value="">Prefer not to say</option>
-            <option value="FEMALE">Female</option>
-            <option value="MALE">Male</option>
-          </select>
-        </label>
-        <button class="button button-primary" type="submit">Show studies that may fit</button>
-      </form>
-      <div id="fit-checker-result" class="fit-checker-result" role="status" aria-live="polite" hidden></div>
-    </section>
-
     <section class="controls" aria-labelledby="filter-heading">
       <div class="controls-heading">
         <div>
-          <p class="eyebrow">Current opportunities</p>
-          <h2 id="filter-heading">Find a study that may fit your family</h2>
+          <h2 id="filter-heading">Find a study</h2>
         </div>
         <button id="refresh-button" class="text-button" type="button">Refresh studies</button>
       </div>
@@ -133,6 +100,34 @@
         <button id="near-me-button" class="button button-ghost" type="button">Find studies near me</button>
         <p id="location-status" role="status" aria-live="polite"></p>
       </div>
+      <details class="fit-checker">
+        <summary>Check basic eligibility</summary>
+        <p class="fit-checker-copy">Enter an exact age and sex to hide studies with a definite mismatch. Other eligibility requirements still apply. Your answers stay in this browser and are not saved or sent anywhere.</p>
+      <form id="fit-checker-form" class="fit-checker-form">
+        <label>
+          <span>Patient's age</span>
+          <div class="age-input-group">
+            <input id="fit-age" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Age" aria-label="Patient's age" />
+            <select id="fit-age-unit" aria-label="Age unit">
+              <option value="YEARS">Years</option>
+              <option value="MONTHS">Months</option>
+              <option value="WEEKS">Weeks</option>
+              <option value="DAYS">Days</option>
+            </select>
+          </div>
+        </label>
+        <label>
+          <span>Sex listed in the medical record</span>
+          <select id="fit-sex">
+            <option value="">Prefer not to say</option>
+            <option value="FEMALE">Female</option>
+            <option value="MALE">Male</option>
+          </select>
+        </label>
+        <button class="button button-primary" type="submit">Show studies that may fit</button>
+      </form>
+      <div id="fit-checker-result" class="fit-checker-result" role="status" aria-live="polite" hidden></div>
+      </details>
     </section>
 
     <section class="results-summary" aria-live="polite">
@@ -197,11 +192,11 @@
         <span class="meta study-type"></span>
       </div>
       <p class="study-format"></p>
-      <section class="plain-language-section" aria-label="Plain-language study overview">
+      <section class="plain-language-section" aria-label="Study overview">
         <div class="plain-language-heading">
           <span class="plain-language-icon" aria-hidden="true">♡</span>
           <div>
-            <p class="plain-language-label">Plain-language overview</p>
+            <p class="plain-language-label">Study overview</p>
             <h3>What is this study about?</h3>
           </div>
         </div>
@@ -216,7 +211,7 @@
             <span class="plain-what"></span>
           </div>
         </div>
-        <p class="plain-language-note">This overview is created automatically from information provided on ClinicalTrials.gov. See the official study record for complete details and eligibility criteria.</p>
+        <p class="plain-language-note">Based on ClinicalTrials.gov information. See the official study record for complete details and eligibility criteria.</p>
       </section>
       <details class="official-summary">
         <summary>Read the ClinicalTrials.gov description</summary>

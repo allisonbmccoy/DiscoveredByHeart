@@ -99,7 +99,9 @@ function addCuratedSummary(card, nctId) {
   attribution.className = "curated-reviewed";
   attribution.textContent = `Reviewed by Sisters by Heart${reviewed ? ` · ${reviewed}` : ""}`;
   section.append(attribution);
-  card.querySelector(".plain-language-section").before(section);
+  const overview = card.querySelector(".plain-language-section");
+  overview.before(section);
+  overview.hidden = true;
 }
 
 async function loadCuratedSummaries() {

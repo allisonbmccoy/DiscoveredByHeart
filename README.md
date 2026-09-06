@@ -57,6 +57,11 @@ Without a valid date, the attribution is simply “Reviewed by Sisters by Heart.
 The questions appear without a separate section title. An entry
 needs at least one nonblank summary field to display a section.
 
+When a curated summary is displayed, the automatic Study overview is hidden
+to avoid repetition. Trials without usable curated content retain the Study
+overview, labeled “Based on ClinicalTrials.gov information.” The expandable
+official description and all other study details remain available in both cases.
+
 Separate multiple NCT entries with commas; use double quotes and no trailing
 commas or comments to keep the file valid JSON. Remove all entries by restoring `{}`.
 
