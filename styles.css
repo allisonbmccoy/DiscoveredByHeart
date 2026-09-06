@@ -346,4 +346,101 @@ footer a { color: #fff; }
 .curated-summary dt { font-weight: 700; }
 .curated-summary dd { margin: 4px 0 14px; white-space: pre-line; }
 .curated-summary dd:last-child { margin-bottom: 0; }
-.curated-reviewed { margin: 14px 0 0; color: var(--muted); font-size: 0.85rem; }
+
+.summary-about {
+  position: relative;
+  display: inline-block;
+  margin-top: 0.75rem;
+}
+
+.summary-about-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #141D41;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.summary-about-button:hover,
+.summary-about-button:focus-visible {
+  color: #F7506A;
+}
+
+.summary-about-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.summary-about-popover {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  bottom: calc(100% + 0.6rem);
+  width: min(420px, calc(100vw - 3rem));
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(20, 29, 65, 0.12);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgba(20, 29, 65, 0.16);
+  color: #141D41;
+  font-size: 0.85rem;
+  line-height: 1.5;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease,
+    visibility 0.15s ease;
+}
+
+.summary-about-popover p {
+  margin: 0 0 0.8rem;
+}
+
+.summary-about-popover p:last-child {
+  margin-bottom: 0;
+}
+
+.summary-about-reviewed {
+  padding-top: 0.15rem;
+}
+
+.summary-about:hover .summary-about-popover,
+.summary-about:focus-within .summary-about-popover,
+.summary-about.is-open .summary-about-popover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+@media (max-width: 600px) {
+  .summary-about {
+    display: block;
+  }
+
+  .summary-about-popover {
+    position: fixed;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    width: auto;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+}

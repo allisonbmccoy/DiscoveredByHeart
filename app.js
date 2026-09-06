@@ -59,12 +59,20 @@ const CURATED_FIELDS = [
   ["what_should_families_know", "What should families know?"],
 ];
 
-function reviewedDateLabel(value) {
+function reviewedDateFullLabel(value) {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return "";
+
   const date = new Date(`${value}T00:00:00Z`);
-  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) return "";
+
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+    return "";
+  }
+
   return date.toLocaleDateString("en-US", {
-    month: "long", year: "numeric", timeZone: "UTC",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
   });
 }
 
@@ -78,30 +86,109 @@ function curatedFields(nctId) {
 
 function addCuratedSummary(card, nctId) {
   const fields = curatedFields(nctId);
+
   // A date alone is not a summary; omit empty or malformed entries.
   if (!fields.length) return;
+
   const entry = curatedSummaries[nctId];
 
   const section = document.createElement("section");
   section.className = "curated-summary";
   section.setAttribute("aria-label", "Sisters by Heart summary");
+
   const list = document.createElement("dl");
+
   fields.forEach(([key, label]) => {
     const term = document.createElement("dt");
     term.textContent = label;
+
     const description = document.createElement("dd");
     description.textContent = entry[key].trim();
+
     list.append(term, description);
   });
+
   section.append(list);
-  const reviewed = reviewedDateLabel(entry.reviewed_date);
-  const attribution = document.createElement("p");
-  attribution.className = "curated-reviewed";
-  attribution.textContent = `Reviewed by Sisters by Heart${reviewed ? ` · ${reviewed}` : ""}`;
-  section.append(attribution);
+  section.appendChild(createSummaryAbout(entry));
+
   const overview = card.querySelector(".plain-language-section");
   overview.before(section);
   overview.hidden = true;
+}
+
+function createSummaryAbout(entry) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "summary-about";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "summary-about-button";
+  button.setAttribute("aria-expanded", "false");
+
+  button.innerHTML = `
+    <span class="summary-about-icon" aria-hidden="true">i</span>
+    <span>About this summary</span>
+  `;
+
+  const popover = document.createElement("div");
+  popover.className = "summary-about-popover";
+  popover.setAttribute("role", "tooltip");
+
+  const reviewedDate = reviewedDateFullLabel(entry.reviewed_date);
+
+  popover.innerHTML = `
+    <p>
+      This plain-language summary was created with ChatGPT (GPT-5.6 Sol)
+      using information from this study’s ClinicalTrials.gov record. It was
+      reviewed and edited by the Sisters by Heart Director for Scientific
+      Community Engagement for accuracy, clarity, and appropriate context.
+    </p>
+
+    <p>
+      ChatGPT was instructed to explain the study at approximately a 6th- to
+      8th-grade reading level, preserve uncertainty, avoid overstating
+      potential benefits, distinguish observational research from studies
+      that assign treatment, and highlight important details families may
+      want to consider before learning more.
+    </p>
+
+    <p>
+      ClinicalTrials.gov remains the source of truth, and study information
+      may change over time.
+    </p>
+
+    ${
+      reviewedDate
+        ? `<p class="summary-about-reviewed"><strong>Summary last reviewed:</strong> ${reviewedDate}</p>`
+        : ""
+    }
+  `;
+
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+
+    const isOpen = wrapper.classList.toggle("is-open");
+    button.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!wrapper.contains(event.target)) {
+      wrapper.classList.remove("is-open");
+      button.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  button.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      wrapper.classList.remove("is-open");
+      button.setAttribute("aria-expanded", "false");
+      button.focus();
+    }
+  });
+
+  wrapper.append(button, popover);
+
+  return wrapper;
 }
 
 async function loadCuratedSummaries() {
