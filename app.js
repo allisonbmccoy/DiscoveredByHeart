@@ -50,6 +50,73 @@ AREA[OverallStatus](
 `.replace(/\s+/g, " ").trim();
 
 let allStudies = [];
+let curatedSummaries = {};
+
+const CURATED_FIELDS = [
+  ["what_is_this_study_about", "What is this study about?"],
+  ["who_might_this_be_for", "Who might this be for?"],
+  ["why_might_this_matter", "Why might this matter?"],
+  ["what_should_families_know", "What should families know?"],
+];
+
+function reviewedDateLabel(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return "";
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) return "";
+  return `Reviewed ${date.toLocaleDateString("en-US", {
+    month: "long", year: "numeric", timeZone: "UTC",
+  })}`;
+}
+
+function addCuratedSummary(card, nctId) {
+  const entry = Object.hasOwn(curatedSummaries, nctId) ? curatedSummaries[nctId] : null;
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) return;
+  const fields = CURATED_FIELDS.filter(([key]) =>
+    typeof entry[key] === "string" && entry[key].trim()
+  );
+  // A date alone is not a summary; omit empty or malformed entries.
+  if (!fields.length) return;
+
+  const section = document.createElement("section");
+  section.className = "curated-summary";
+  section.setAttribute("aria-label", "Sisters by Heart summary");
+  const heading = document.createElement("h3");
+  heading.textContent = "Sisters by Heart summary";
+  section.append(heading);
+  const list = document.createElement("dl");
+  fields.forEach(([key, label]) => {
+    const term = document.createElement("dt");
+    term.textContent = label;
+    const description = document.createElement("dd");
+    description.textContent = entry[key].trim();
+    list.append(term, description);
+  });
+  section.append(list);
+  const reviewed = reviewedDateLabel(entry.reviewed_date);
+  if (reviewed) {
+    const date = document.createElement("p");
+    date.className = "curated-reviewed";
+    date.textContent = reviewed;
+    section.append(date);
+  }
+  card.querySelector(".summary").before(section);
+}
+
+async function loadCuratedSummaries() {
+  try {
+    const response = await fetch("data/curated-summaries.json");
+    if (!response.ok) return;
+    const data = await response.json();
+    if (!data || typeof data !== "object" || Array.isArray(data)) return;
+    curatedSummaries = data;
+    // Enhance already-rendered cards without resetting filters or open details.
+    els.results.querySelectorAll(".study-card").forEach((card) => {
+      addCuratedSummary(card, card.querySelector(".nct-id").textContent);
+    });
+  } catch (_) {
+    // Optional enhancement; live studies remain usable even if this file fails.
+  }
+}
 
 const els = {
   results: document.querySelector("#results"),
@@ -252,6 +319,7 @@ function render() {
       study.studyType ? humanizeEnum(study.studyType) : "Study type not listed";
 
     fragment.querySelector(".summary").textContent = truncate(study.summary);
+    addCuratedSummary(card, study.nctId);
 
     const tags = fragment.querySelector(".condition-tags");
     const conditions = study.conditions.slice(0, 8);
@@ -367,3 +435,4 @@ els.expertLink.href = expertSearchUrl();
 
 loadVersion();
 loadStudies();
+loadCuratedSummaries();
