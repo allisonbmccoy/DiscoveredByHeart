@@ -251,13 +251,8 @@ input:focus, select:focus, button:focus, a:focus {
 .contact-item p { margin: 4px 0 0; }
 .contact-note, .eligibility-warning { margin: 12px 0 0; color: var(--muted); font-size: .8rem; }
 .participation-section { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); }
-.criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 14px; }
-.criteria-grid h4 { margin: 0 0 7px; font-size: .85rem; }
-.criteria-grid ul { margin: 0; padding-left: 20px; color: #38425f; }
-.criteria-grid li + li { margin-top: 5px; }
 .healthy-volunteers { font-weight: 700; }
-.full-eligibility-details summary { cursor: pointer; color: #087b92; font-weight: 700; }
-.full-eligibility { color: #38425f; line-height: 1.65; }
+.full-eligibility { margin-top: 16px; color: #38425f; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 .loading-card, .error-card, .empty-card {
   display: flex; gap: 14px; align-items: center; margin: 18px 0; padding: 22px;
@@ -291,7 +286,6 @@ footer a { color: #fff; }
   .hero-inner { align-items: flex-start; flex-direction: column; padding: 48px 0; }
   .filter-grid { grid-template-columns: 1fr 1fr; }
   .details-panel dl { grid-template-columns: 1fr; }
-  .criteria-grid { grid-template-columns: 1fr; }
   .fit-checker-form { grid-template-columns: 1fr 1fr; }
   .fit-checker-form .button { grid-column: 1 / -1; }
 }

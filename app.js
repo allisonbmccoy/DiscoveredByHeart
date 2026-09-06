@@ -385,25 +385,6 @@ function eligibilityHighlights(criteria) {
   )].slice(0, 3);
 }
 
-function parseEligibilityCriteria(criteria) {
-  const text = String(criteria || "").replace(/\r/g, "").trim();
-  if (!text) return { inclusion: [], exclusion: [] };
-  const sections = text.split(/^\s*exclusion criteria:?\s*$/im);
-  return {
-    inclusion: criteriaLines(sections[0].replace(/^\s*inclusion criteria:?\s*$/gim, "")),
-    exclusion: criteriaLines(sections.slice(1).join("\n")),
-  };
-}
-
-function criteriaLines(value) {
-  return [...new Set(
-    String(value || "")
-      .split(/\n+/)
-      .map((line) => cleanText(line.replace(/^[-•*]+\s*/, "")))
-      .filter(Boolean)
-  )];
-}
-
 function sentenceList(items) {
   const clean = [...new Set((items || []).map(cleanText).filter(Boolean))];
   if (clean.length < 2) return clean[0] || "";
@@ -543,34 +524,20 @@ function renderContactPanel(fragment, study) {
 }
 
 function renderCriteria(fragment, study) {
-  const criteria = parseEligibilityCriteria(study.eligibilityCriteria);
+  const criteria = typeof study.eligibilityCriteria === "string" ? study.eligibilityCriteria : "";
   const section = fragment.querySelector(".participation-section");
-  if (!criteria.inclusion.length && !criteria.exclusion.length) {
+  if (!criteria.trim()) {
     section.hidden = true;
     return;
   }
-  [[".inclusion-list", criteria.inclusion], [".exclusion-list", criteria.exclusion]].forEach(([selector, items]) => {
-    const list = fragment.querySelector(selector);
-    if (!items.length) {
-      list.parentElement.hidden = true;
-      return;
-    }
-    const priorityTerms = /single[- ]ventricle|norwood|interstage|glenn|fontan|cardiac catheter/i;
-    [...items]
-      .sort((a, b) => Number(priorityTerms.test(b)) - Number(priorityTerms.test(a)))
-      .slice(0, 4)
-      .forEach((criterion) => {
-      const li = document.createElement("li");
-      li.textContent = criterion;
-      list.append(li);
-      });
-  });
+  // Preserve the registry's complete text, list markers, indentation, and order.
+  // textContent keeps source text safe without interpreting it as HTML.
+  fragment.querySelector(".full-eligibility").textContent = criteria;
   fragment.querySelector(".healthy-volunteers").textContent = study.healthyVolunteers === true
     ? "Healthy volunteers are accepted."
     : study.healthyVolunteers === false
       ? "Healthy volunteers are not accepted."
       : "Healthy-volunteer eligibility is not listed.";
-  fragment.querySelector(".full-eligibility").textContent = cleanText(study.eligibilityCriteria);
 }
 
 function populateStateFilter() {
