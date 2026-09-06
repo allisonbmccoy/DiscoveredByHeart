@@ -1,5 +1,5 @@
 // ============================================================
-// Sisters by Heart: Single Ventricle Clinical Trial Finder
+// Sisters by Heart: Discovered by Heart
 // ClinicalTrials.gov API v2
 //
 // Edit SEARCH_QUERY below to change the underlying study search.
@@ -99,7 +99,7 @@ function addCuratedSummary(card, nctId) {
     date.textContent = reviewed;
     section.append(date);
   }
-  card.querySelector(".summary").before(section);
+  card.querySelector(".plain-language-section").before(section);
 }
 
 async function loadCuratedSummaries() {
@@ -118,6 +118,9 @@ async function loadCuratedSummaries() {
   }
 }
 
+let userLocation = null;
+let fitProfile = null;
+
 const els = {
   results: document.querySelector("#results"),
   loading: document.querySelector("#loading"),
@@ -128,10 +131,17 @@ const els = {
   age: document.querySelector("#age-filter"),
   status: document.querySelector("#status-filter"),
   state: document.querySelector("#state-filter"),
+  nearMe: document.querySelector("#near-me-button"),
+  locationStatus: document.querySelector("#location-status"),
   clear: document.querySelector("#clear-filters"),
   refresh: document.querySelector("#refresh-button"),
   expertLink: document.querySelector("#expert-search-link"),
   template: document.querySelector("#study-template"),
+  fitForm: document.querySelector("#fit-checker-form"),
+  fitAge: document.querySelector("#fit-age"),
+  fitAgeUnit: document.querySelector("#fit-age-unit"),
+  fitSex: document.querySelector("#fit-sex"),
+  fitResult: document.querySelector("#fit-checker-result"),
 };
 
 function expertSearchUrl() {
@@ -189,10 +199,14 @@ function normalizeStudy(study) {
   const cond = getModule(study, "conditionsModule");
   const elig = getModule(study, "eligibilityModule");
   const design = getModule(study, "designModule");
+  const arms = getModule(study, "armsInterventionsModule");
   const contacts = getModule(study, "contactsLocationsModule");
   const sponsor = getModule(study, "sponsorCollaboratorsModule");
 
-  const locations = contacts.locations || [];
+  const locations = Array.isArray(contacts.locations) ? contacts.locations.filter(Boolean) : [];
+  const recruitingLocations = locations.filter(
+    (location) => location.status === "RECRUITING" || location.status === "NOT_YET_RECRUITING"
+  );
   const states = [...new Set(
     locations
       .map((loc) => loc.state || loc.country)
@@ -204,8 +218,11 @@ function normalizeStudy(study) {
     id.briefTitle,
     id.officialTitle,
     desc.briefSummary,
+    desc.detailedDescription,
+    elig.eligibilityCriteria,
     ...(cond.conditions || []),
     ...(cond.keywords || []),
+    ...(arms.interventions || []).flatMap((intervention) => [intervention.name, intervention.description]),
     ...locations.flatMap((l) => [l.facility, l.city, l.state, l.country]),
   ]
     .filter(Boolean)
@@ -217,24 +234,189 @@ function normalizeStudy(study) {
     nctId: id.nctId || "",
     title: id.briefTitle || id.officialTitle || "Untitled study",
     status: status.overallStatus || "",
-    summary: desc.briefSummary || "A brief study summary is not available.",
-    conditions: cond.conditions || [],
-    ages: elig.stdAges || [],
+    summary: desc.briefSummary || "",
+    detailedDescription: desc.detailedDescription || "",
+    eligibilityCriteria: elig.eligibilityCriteria || "",
+    conditions: Array.isArray(cond.conditions) ? cond.conditions.filter(Boolean) : [],
+    ages: Array.isArray(elig.stdAges) ? elig.stdAges.filter(Boolean) : [],
     sex: elig.sex || "ALL",
     studyType: design.studyType || "",
+    primaryPurpose: design.designInfo?.primaryPurpose || "",
+    phases: Array.isArray(design.phases) ? design.phases.filter(Boolean) : [],
+    interventions: Array.isArray(arms.interventions) ? arms.interventions.filter(Boolean) : [],
+    minAge: elig.minimumAge || "",
+    maxAge: elig.maximumAge || "",
+    healthyVolunteers: elig.healthyVolunteers,
     enrollment: design.enrollmentInfo?.count ?? null,
     sponsor: sponsor.leadSponsor?.name || "Not listed",
+    centralContacts: Array.isArray(contacts.centralContacts) ? contacts.centralContacts.filter(Boolean) : [],
     locations,
+    recruitingLocations,
     states,
+    lastUpdated: status.lastUpdatePostDateStruct?.date || status.lastUpdateSubmitDate || "",
+    pathwayTags: pathwayTags([
+      id.briefTitle,
+      id.officialTitle,
+      desc.briefSummary,
+      desc.detailedDescription,
+      elig.eligibilityCriteria,
+      ...(cond.keywords || []),
+      ...(arms.interventions || []).flatMap((intervention) => [
+        intervention.name,
+        intervention.description,
+      ]),
+    ]),
     searchable,
   };
 }
 
+const AGE_UNIT_DAYS = { DAYS: 1, WEEKS: 7, MONTHS: 30.4375, YEARS: 365.25 };
+
+function ageInDays(value) {
+  const match = String(value || "").trim().match(/^([\d.]+)\s+(Days?|Weeks?|Months?|Years?)$/i);
+  if (!match) return null;
+  const unit = `${match[2].replace(/s$/i, "").toUpperCase()}S`;
+  const days = Number(match[1]) * AGE_UNIT_DAYS[unit];
+  return Number.isFinite(days) ? days : null;
+}
+
+function basicFit(study) {
+  if (!fitProfile) return { matches: true, unknown: false };
+  let unknown = false;
+  const patientAgeDays = fitProfile.age * AGE_UNIT_DAYS[fitProfile.ageUnit];
+  const minDays = ageInDays(study.minAge);
+  const maxDays = ageInDays(study.maxAge);
+
+  if (minDays != null && patientAgeDays < minDays) return { matches: false, unknown: false };
+  if (maxDays != null && patientAgeDays > maxDays) return { matches: false, unknown: false };
+  if (minDays == null || maxDays == null) unknown = true;
+  if (fitProfile.sex && study.sex && study.sex !== "ALL" && study.sex !== fitProfile.sex) {
+    return { matches: false, unknown: false };
+  }
+  if (fitProfile.sex && !study.sex) unknown = true;
+  return { matches: true, unknown };
+}
+
+function pathwayTags(values) {
+  const text = (values || []).filter(Boolean).join(" ");
+  const supportedTags = [
+    ["Norwood", /\bnorwood\b/i],
+    ["Interstage", /\binterstage\b/i],
+    ["Glenn", /\bglenn\b/i],
+    ["Fontan", /\bfontan\b/i],
+  ];
+  return supportedTags.filter(([, pattern]) => pattern.test(text)).map(([label]) => label);
+}
+
+
+function friendlyList(items, max = 3) {
+  const clean = [...new Set((items || []).map(cleanText).filter(Boolean))];
+  if (!clean.length) return "";
+  if (clean.length <= max) return clean.join(", ");
+  return `${clean.slice(0, max).join(", ")}, and other related conditions`;
+}
+
+function ageRangeText(study) {
+  const min = cleanText(study.minAge);
+  const max = cleanText(study.maxAge);
+  if (min && max) return `people ages ${min} to ${max}`;
+  if (min) return `people age ${min} and older`;
+  if (max) return `people up to age ${max}`;
+  if (study.ages.length) return study.ages.map(humanizeEnum).join(" and ").toLowerCase();
+  return "people who meet the study's eligibility requirements";
+}
+
+function interventionText(study) {
+  const names = study.interventions.map((i) => cleanText(i.name)).filter(Boolean);
+  if (names.length) return friendlyList(names, 3);
+  if (study.studyType === "OBSERVATIONAL") return "Researchers are observing health information and outcomes rather than assigning a study treatment.";
+  return "The specific intervention or approach is described in the official study record.";
+}
+
+function plainLanguageSummary(study) {
+  const summary = cleanText(study.summary);
+  if (!summary) return "ClinicalTrials.gov does not provide a brief summary for this study.";
+
+  // Keep the registry's meaning intact while making common purpose-style openings
+  // read naturally as a complete, family-facing sentence.
+  const purposeOpenings = [
+    [/^to compare\b/i, "This study compares"],
+    [/^to evaluate\b/i, "This study evaluates"],
+    [/^to assess\b/i, "This study assesses"],
+    [/^to determine\b/i, "This study aims to determine"],
+    [/^to investigate\b/i, "This study investigates"],
+    [/^to examine\b/i, "This study examines"],
+    [/^to describe\b/i, "This study describes"],
+  ];
+  const opening = purposeOpenings.find(([pattern]) => pattern.test(summary));
+  const familySummary = opening ? summary.replace(opening[0], opening[1]) : summary;
+  return truncate(familySummary, 520);
+}
+
+function whoMightFit(study) {
+  const age = ageRangeText(study);
+  const relevantCriteria = eligibilityHighlights(study.eligibilityCriteria);
+  const highlights = relevantCriteria.length ? ` Registry criteria also mention ${sentenceList(relevantCriteria)}.` : "";
+  return `This study lists ${age}.${highlights} The study team determines eligibility; other requirements also apply.`;
+}
+
+function eligibilityHighlights(criteria) {
+  const cleaned = String(criteria || "").replace(/\r/g, "").trim();
+  if (!cleaned) return [];
+
+  const inclusionOnly = cleaned
+    .split(/^\s*exclusion criteria:?\s*$/im)[0]
+    .replace(/^\s*inclusion criteria:?\s*$/gim, "");
+  const relevant = /single[- ]ventricle|norwood|interstage|glenn|fontan|cardiac catheter/i;
+  return [...new Set(
+    inclusionOnly
+      .split(/\n+|;\s+/)
+      .map((line) => cleanText(line.replace(/^[-•*]+\s*/, "")).replace(/[.;]+$/, ""))
+      .filter((line) => line && relevant.test(line))
+  )].slice(0, 3);
+}
+
+function parseEligibilityCriteria(criteria) {
+  const text = String(criteria || "").replace(/\r/g, "").trim();
+  if (!text) return { inclusion: [], exclusion: [] };
+  const sections = text.split(/^\s*exclusion criteria:?\s*$/im);
+  return {
+    inclusion: criteriaLines(sections[0].replace(/^\s*inclusion criteria:?\s*$/gim, "")),
+    exclusion: criteriaLines(sections.slice(1).join("\n")),
+  };
+}
+
+function criteriaLines(value) {
+  return [...new Set(
+    String(value || "")
+      .split(/\n+/)
+      .map((line) => cleanText(line.replace(/^[-•*]+\s*/, "")))
+      .filter(Boolean)
+  )];
+}
+
+function sentenceList(items) {
+  const clean = [...new Set((items || []).map(cleanText).filter(Boolean))];
+  if (clean.length < 2) return clean[0] || "";
+  if (clean.length === 2) return `${clean[0]} and ${clean[1]}`;
+  return `${clean.slice(0, -1).join(", ")}, and ${clean.at(-1)}`;
+}
+
+function phaseText(study) {
+  if (!study.phases.length) return "Not listed";
+  return study.phases.map((phase) => phase === "NA" ? "Not applicable" : humanizeEnum(phase)).join(" · ");
+}
+
+function formatRecordDate(value) {
+  if (!value) return "Not listed";
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime())
+    ? cleanText(value)
+    : date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
 function locationText(study) {
-  const recruitingLocations = study.locations.filter(
-    (loc) => !loc.status || loc.status === "RECRUITING" || loc.status === "NOT_YET_RECRUITING"
-  );
-  const locations = recruitingLocations.length ? recruitingLocations : study.locations;
+  const locations = study.recruitingLocations.length ? study.recruitingLocations : study.locations;
 
   if (!locations.length) return "No site locations are listed yet.";
 
@@ -248,6 +430,138 @@ function locationText(study) {
   if (!labels.length) return `${locations.length} location${locations.length === 1 ? "" : "s"} listed`;
   if (labels.length <= 4) return labels.join(" • ");
   return `${labels.slice(0, 4).join(" • ")} • +${labels.length - 4} more`;
+}
+
+function studyFormatText(study) {
+  if (study.studyType === "INTERVENTIONAL") {
+    return "Interventional — the study assigns an intervention, procedure, device, drug, or other approach.";
+  }
+  if (study.studyType === "OBSERVATIONAL") {
+    return "Observational — researchers collect information or measurements without assigning the treatment being studied. Tests or visits may still be required.";
+  }
+  return study.studyType ? humanizeEnum(study.studyType) : "Study format is not listed.";
+}
+
+function radians(degrees) {
+  return degrees * Math.PI / 180;
+}
+
+function distanceMiles(from, to) {
+  const latitudeDelta = radians(to.latitude - from.latitude);
+  const longitudeDelta = radians(to.longitude - from.longitude);
+  const a = Math.sin(latitudeDelta / 2) ** 2
+    + Math.cos(radians(from.latitude)) * Math.cos(radians(to.latitude))
+    * Math.sin(longitudeDelta / 2) ** 2;
+  return 3958.8 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function locationCoordinates(location) {
+  if (location?.geoPoint?.lat == null || location?.geoPoint?.lon == null) return null;
+  const latitude = Number(location?.geoPoint?.lat);
+  const longitude = Number(location?.geoPoint?.lon);
+  return Number.isFinite(latitude) && Number.isFinite(longitude) ? { latitude, longitude } : null;
+}
+
+function nearestOpenLocation(study) {
+  if (!userLocation) return null;
+  return study.recruitingLocations
+    .map((location) => {
+      const coordinates = locationCoordinates(location);
+      return coordinates ? { location, distance: distanceMiles(userLocation, coordinates) } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.distance - b.distance)[0] || null;
+}
+
+function locationLabel(location) {
+  return [location?.facility, location?.city, location?.state || location?.country]
+    .map(cleanText)
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function contactForStudy(study) {
+  const nearest = nearestOpenLocation(study);
+  const selectedLocation = nearest?.location || study.recruitingLocations.find(
+    (location) => els.state.value && (location.state === els.state.value || location.country === els.state.value)
+  );
+  const selectedContacts = selectedLocation && Array.isArray(selectedLocation.contacts)
+    ? selectedLocation.contacts.filter(Boolean)
+    : [];
+  if (selectedContacts.length) return { contacts: selectedContacts, context: locationLabel(selectedLocation) };
+  if (study.centralContacts.length) return { contacts: study.centralContacts, context: "Overall study contact" };
+  const location = study.recruitingLocations.find((item) => Array.isArray(item.contacts) && item.contacts.length);
+  return location ? { contacts: location.contacts.filter(Boolean), context: locationLabel(location) } : null;
+}
+
+function appendContactLink(container, label, value, href) {
+  if (!value) return;
+  const row = document.createElement("p");
+  const strong = document.createElement("strong");
+  const link = document.createElement("a");
+  strong.textContent = `${label}: `;
+  link.textContent = cleanText(value);
+  link.href = href;
+  row.append(strong, link);
+  container.append(row);
+}
+
+function renderContactPanel(fragment, study) {
+  const contactInfo = contactForStudy(study);
+  const button = fragment.querySelector(".contact-toggle");
+  const panel = fragment.querySelector(".contact-panel");
+  if (!contactInfo?.contacts.length) {
+    button.hidden = true;
+    return;
+  }
+  fragment.querySelector(".contact-context").textContent = contactInfo.context;
+  const contactList = fragment.querySelector(".contact-list");
+  contactInfo.contacts.slice(0, 2).forEach((contact) => {
+    const item = document.createElement("div");
+    item.className = "contact-item";
+    const name = document.createElement("strong");
+    name.textContent = cleanText(contact.name) || "Study contact";
+    item.append(name);
+    appendContactLink(item, "Email", contact.email, `mailto:${contact.email || ""}`);
+    appendContactLink(item, "Phone", contact.phone, `tel:${contact.phone || ""}`);
+    contactList.append(item);
+  });
+  button.addEventListener("click", () => {
+    const opening = panel.hidden;
+    panel.hidden = !panel.hidden;
+    button.textContent = opening ? "Hide study contact" : "Contact study team";
+  });
+}
+
+function renderCriteria(fragment, study) {
+  const criteria = parseEligibilityCriteria(study.eligibilityCriteria);
+  const section = fragment.querySelector(".participation-section");
+  if (!criteria.inclusion.length && !criteria.exclusion.length) {
+    section.hidden = true;
+    return;
+  }
+  [[".inclusion-list", criteria.inclusion], [".exclusion-list", criteria.exclusion]].forEach(([selector, items]) => {
+    const list = fragment.querySelector(selector);
+    if (!items.length) {
+      list.parentElement.hidden = true;
+      return;
+    }
+    const priorityTerms = /single[- ]ventricle|norwood|interstage|glenn|fontan|cardiac catheter/i;
+    [...items]
+      .sort((a, b) => Number(priorityTerms.test(b)) - Number(priorityTerms.test(a)))
+      .slice(0, 4)
+      .forEach((criterion) => {
+      const li = document.createElement("li");
+      li.textContent = criterion;
+      list.append(li);
+      });
+  });
+  fragment.querySelector(".healthy-volunteers").textContent = study.healthyVolunteers === true
+    ? "Healthy volunteers are accepted."
+    : study.healthyVolunteers === false
+      ? "Healthy volunteers are not accepted."
+      : "Healthy-volunteer eligibility is not listed.";
+  fragment.querySelector(".full-eligibility").textContent = cleanText(study.eligibilityCriteria);
 }
 
 function populateStateFilter() {
@@ -271,13 +585,18 @@ function filteredStudies() {
   const status = els.status.value;
   const state = els.state.value;
 
-  return allStudies.filter((study) => {
+  const studies = allStudies.filter((study) => {
     const textOk = !text || study.searchable.includes(text);
     const ageOk = !age || study.ages.includes(age);
     const statusOk = !status || study.status === status;
     const stateOk = !state || study.states.includes(state);
-    return textOk && ageOk && statusOk && stateOk;
+    const fitOk = basicFit(study).matches;
+    return textOk && ageOk && statusOk && stateOk && fitOk;
   });
+  if (userLocation) {
+    studies.sort((a, b) => (nearestOpenLocation(a)?.distance ?? Infinity) - (nearestOpenLocation(b)?.distance ?? Infinity));
+  }
+  return studies;
 }
 
 function render() {
@@ -302,61 +621,112 @@ function render() {
   }
 
   studies.forEach((study) => {
-    const fragment = els.template.content.cloneNode(true);
-    const card = fragment.querySelector(".study-card");
+    try {
+      const fragment = els.template.content.cloneNode(true);
+      addCuratedSummary(fragment.querySelector(".study-card"), study.nctId);
 
-    const badge = fragment.querySelector(".status-badge");
-    badge.textContent = statusLabel(study.status);
-    badge.classList.add(study.status === "RECRUITING" ? "recruiting" : "soon");
+      const badge = fragment.querySelector(".status-badge");
+      badge.textContent = statusLabel(study.status);
+      badge.classList.add(study.status === "RECRUITING" ? "recruiting" : "soon");
 
-    fragment.querySelector(".nct-id").textContent = study.nctId;
-    fragment.querySelector(".study-title").textContent = study.title;
+      fragment.querySelector(".nct-id").textContent = study.nctId || "ClinicalTrials.gov study";
+      const fitBadge = fragment.querySelector(".fit-badge");
+      if (fitProfile) {
+        const fit = basicFit(study);
+        fitBadge.hidden = false;
+        fitBadge.textContent = fit.unknown ? "Basic fit needs review" : "Basic criteria match";
+        fitBadge.classList.add(fit.unknown ? "review" : "match");
+      }
+      fragment.querySelector(".study-title").textContent = study.title;
 
-    fragment.querySelector(".ages").textContent =
-      study.ages.length ? study.ages.map(humanizeEnum).join(" · ") : "Age not listed";
+      fragment.querySelector(".ages").textContent =
+        study.ages.length ? study.ages.map(humanizeEnum).join(" · ") : "Age not listed";
 
-    fragment.querySelector(".study-type").textContent =
-      study.studyType ? humanizeEnum(study.studyType) : "Study type not listed";
+      fragment.querySelector(".study-type").textContent =
+        study.studyType ? humanizeEnum(study.studyType) : "Study type not listed";
+      fragment.querySelector(".study-format").textContent = studyFormatText(study);
 
-    fragment.querySelector(".summary").textContent = truncate(study.summary);
-    addCuratedSummary(card, study.nctId);
+      fragment.querySelector(".plain-summary").textContent = plainLanguageSummary(study);
+      fragment.querySelector(".plain-who").textContent = whoMightFit(study);
+      fragment.querySelector(".plain-what").textContent = interventionText(study);
+      fragment.querySelector(".official-brief-summary").textContent =
+        cleanText(study.summary) || "A brief summary is not available.";
+      const detailedDescription = fragment.querySelector(".official-detailed-description");
+      const detailedDescriptionBlock = fragment.querySelector(".official-detailed-block");
+      if (study.detailedDescription) {
+        detailedDescription.textContent = cleanText(study.detailedDescription);
+      } else {
+        detailedDescriptionBlock.hidden = true;
+      }
 
-    const tags = fragment.querySelector(".condition-tags");
-    const conditions = study.conditions.slice(0, 8);
-    if (conditions.length) {
-      conditions.forEach((condition) => {
+      const pathwayTagsContainer = fragment.querySelector(".pathway-tags");
+      const pathwaySection = fragment.querySelector(".pathway-section");
+      if (study.pathwayTags.length) {
+        study.pathwayTags.forEach((tag) => {
+          const span = document.createElement("span");
+          span.textContent = tag;
+          pathwayTagsContainer.append(span);
+        });
+      } else {
+        pathwaySection.hidden = true;
+      }
+
+      const tags = fragment.querySelector(".condition-tags");
+      const conditions = study.conditions.slice(0, 8);
+      if (conditions.length) {
+        conditions.forEach((condition) => {
+          const span = document.createElement("span");
+          span.textContent = condition;
+          tags.append(span);
+        });
+      } else {
         const span = document.createElement("span");
-        span.textContent = condition;
+        span.textContent = "Condition not listed";
         tags.append(span);
+      }
+
+      fragment.querySelector(".locations").textContent = locationText(study);
+      const nearest = nearestOpenLocation(study);
+      const nearestText = fragment.querySelector(".nearest-location");
+      if (nearest) {
+        nearestText.textContent = `Nearest open site: about ${Math.round(nearest.distance).toLocaleString()} miles · ${locationLabel(nearest.location)}`;
+      } else {
+        nearestText.hidden = true;
+      }
+
+      const link = fragment.querySelector(".study-link");
+      link.href = study.nctId
+        ? `https://clinicaltrials.gov/study/${encodeURIComponent(study.nctId)}`
+        : "https://clinicaltrials.gov/";
+
+      const enrollmentNumber = Number(study.enrollment);
+      fragment.querySelector(".enrollment").textContent =
+        study.enrollment == null || Number.isNaN(enrollmentNumber)
+          ? "Not listed"
+          : enrollmentNumber.toLocaleString();
+
+      fragment.querySelector(".sex").textContent =
+        study.sex === "ALL" ? "All sexes" : humanizeEnum(study.sex);
+
+      fragment.querySelector(".sponsor").textContent = study.sponsor;
+      fragment.querySelector(".phase").textContent = phaseText(study);
+      fragment.querySelector(".open-locations").textContent = study.recruitingLocations.length.toLocaleString();
+      fragment.querySelector(".last-updated").textContent = formatRecordDate(study.lastUpdated);
+      renderContactPanel(fragment, study);
+      renderCriteria(fragment, study);
+
+      const toggle = fragment.querySelector(".details-toggle");
+      const panel = fragment.querySelector(".details-panel");
+      toggle.addEventListener("click", () => {
+        const opening = panel.hidden;
+        panel.hidden = !panel.hidden;
+        toggle.textContent = opening ? "Hide details" : "More details";
       });
-    } else {
-      const span = document.createElement("span");
-      span.textContent = "Condition not listed";
-      tags.append(span);
+
+      els.results.append(fragment);
+    } catch (cardError) {
+      console.warn("Skipping a study that could not be displayed", study?.nctId, cardError);
     }
-
-    fragment.querySelector(".locations").textContent = locationText(study);
-
-    const link = fragment.querySelector(".study-link");
-    link.href = `https://clinicaltrials.gov/study/${encodeURIComponent(study.nctId)}`;
-
-    fragment.querySelector(".enrollment").textContent =
-      study.enrollment == null ? "Not listed" : study.enrollment.toLocaleString();
-
-    fragment.querySelector(".sex").textContent =
-      study.sex === "ALL" ? "All sexes" : humanizeEnum(study.sex);
-
-    fragment.querySelector(".sponsor").textContent = study.sponsor;
-
-    const toggle = fragment.querySelector(".details-toggle");
-    const panel = fragment.querySelector(".details-panel");
-    toggle.addEventListener("click", () => {
-      const opening = panel.hidden;
-      panel.hidden = !panel.hidden;
-      toggle.textContent = opening ? "Hide details" : "More details";
-    });
-
-    els.results.append(card);
   });
 }
 
@@ -403,10 +773,19 @@ async function loadStudies() {
 
     populateStateFilter();
     render();
+
+    if (allStudies.length && !els.results.children.length) {
+      throw new Error("Studies were returned but could not be displayed.");
+    }
+    els.error.hidden = true;
+    els.loading.hidden = true;
   } catch (error) {
     console.error(error);
+    els.loading.hidden = true;
     els.error.hidden = false;
-    els.count.textContent = "Studies unavailable";
+    if (!allStudies.length) {
+      els.count.textContent = "Studies unavailable";
+    }
   } finally {
     els.loading.hidden = true;
   }
@@ -417,7 +796,68 @@ function clearFilters() {
   els.age.value = "";
   els.status.value = "";
   els.state.value = "";
+  userLocation = null;
+  fitProfile = null;
+  els.fitForm.reset();
+  els.fitResult.hidden = true;
+  els.nearMe.textContent = "Find studies near me";
+  els.locationStatus.textContent = "";
   render();
+}
+
+els.fitForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const age = Number(els.fitAge.value);
+  if (!els.fitAge.value || !Number.isFinite(age) || age < 0) {
+    els.fitResult.hidden = false;
+    els.fitResult.className = "fit-checker-result error";
+    els.fitResult.textContent = "Enter the patient's age to check for a basic match.";
+    els.fitAge.focus();
+    return;
+  }
+  fitProfile = { age, ageUnit: els.fitAgeUnit.value, sex: els.fitSex.value };
+  render();
+  const matches = filteredStudies().length;
+  els.fitResult.hidden = false;
+  els.fitResult.className = "fit-checker-result";
+  els.fitResult.innerHTML = `<strong>${matches} stud${matches === 1 ? "y" : "ies"} may fit these basic details.</strong> This is only a first screen. Diagnosis, medical history, tests, and other criteria still need review by the study team. <button type="button" class="text-button" id="clear-fit-check">Show all studies</button>`;
+  document.querySelector("#clear-fit-check").addEventListener("click", () => {
+    fitProfile = null;
+    els.fitForm.reset();
+    els.fitResult.hidden = true;
+    render();
+  });
+  els.results.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+function findStudiesNearMe() {
+  if (userLocation) {
+    userLocation = null;
+    els.nearMe.textContent = "Find studies near me";
+    els.locationStatus.textContent = "Distance sorting cleared.";
+    render();
+    return;
+  }
+  if (!navigator.geolocation) {
+    els.locationStatus.textContent = "Location services are not available in this browser.";
+    return;
+  }
+  els.nearMe.disabled = true;
+  els.locationStatus.textContent = "Requesting your approximate location…";
+  navigator.geolocation.getCurrentPosition(
+    ({ coords }) => {
+      userLocation = { latitude: coords.latitude, longitude: coords.longitude };
+      els.nearMe.disabled = false;
+      els.nearMe.textContent = "Clear distance sorting";
+      els.locationStatus.textContent = "Studies are sorted by the nearest currently open site. Your location stays in this browser and is not saved.";
+      render();
+    },
+    () => {
+      els.nearMe.disabled = false;
+      els.locationStatus.textContent = "We couldn't access your location. You can still use the state/region filter.";
+    },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+  );
 }
 
 [els.text, els.age, els.status, els.state].forEach((el) => {
@@ -426,6 +866,7 @@ function clearFilters() {
 });
 
 els.clear.addEventListener("click", clearFilters);
+els.nearMe.addEventListener("click", findStudiesNearMe);
 els.refresh.addEventListener("click", () => {
   loadStudies();
   loadVersion();
