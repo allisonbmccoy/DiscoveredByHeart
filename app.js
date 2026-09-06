@@ -94,7 +94,22 @@ function addCuratedSummary(card, nctId) {
 
   const section = document.createElement("section");
   section.className = "curated-summary";
-  section.setAttribute("aria-label", "Sisters by Heart summary");
+  section.setAttribute("aria-label", "Study Summary");
+
+  const heading = document.createElement("div");
+  heading.className = "curated-summary-heading";
+
+  const icon = document.createElement("span");
+  icon.className = "curated-summary-icon";
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = "♡";
+
+  const label = document.createElement("p");
+  label.className = "curated-summary-label";
+  label.textContent = "Study Summary";
+
+  heading.append(icon, label);
+  section.append(heading);
 
   const list = document.createElement("dl");
 

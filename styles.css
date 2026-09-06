@@ -495,7 +495,7 @@ input:focus, select:focus, button:focus, a:focus {
   .fit-checker-form .button { grid-column: auto; }
   .distance-tools { align-items: flex-start; flex-direction: column; }
   .controls, .study-card { padding: 20px; }
-  .controls-heading, .results-summary, .footer-inner { align-items: flex-start; flex-direction: column; }
+  .controls-heading, .results-summary, { align-items: flex-start; flex-direction: column; }
   .card-actions { align-items: stretch; flex-direction: column; }
   .button { width: 100%; }
 }
@@ -526,23 +526,70 @@ input:focus, select:focus, button:focus, a:focus {
 @media (max-width: 700px) { .plain-facts { grid-template-columns: 1fr; } }
 
 .curated-summary {
-  margin-bottom: 20px;
-  padding: 18px;
+  margin: 20px 0;
+  padding: 20px;
   background: var(--light-blue);
-  border: 1px solid var(--border);
+  border: 1px solid #d7ebf2;
   border-left: 4px solid var(--pink);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow-wrap: anywhere;
 }
 
-.curated-summary dl { margin: 0; }
-.curated-summary dt { font-weight: 700; }
-.curated-summary dd { margin: 4px 0 14px; white-space: pre-line; }
-.curated-summary dd:last-child { margin-bottom: 0; }
+.curated-summary-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.curated-summary-icon {
+  color: var(--pink);
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.curated-summary-label {
+  margin: 0;
+  color: #087b92;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.curated-summary dl {
+  margin: 0;
+}
+
+.curated-summary dt {
+  margin-top: 16px;
+  color: var(--dark-blue);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.curated-summary dt:first-child {
+  margin-top: 0;
+  font-family: "Varela Round", "Open Sans", sans-serif;
+  font-size: 1.08rem;
+  font-weight: 400;
+}
+
+.curated-summary dd {
+  margin: 4px 0 0;
+  color: #273451;
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.curated-summary dd + dt {
+  margin-top: 16px;
+}
+
 .summary-about {
   position: relative;
   display: inline-block;
-  margin-top: 0.75rem;
+  margin-top: 16px;
 }
 
 .summary-about-button {
