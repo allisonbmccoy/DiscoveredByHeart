@@ -64,3 +64,8 @@ and cannot add a trial to the results. Trials without summaries display normally
 with no empty summary box. Missing, invalid, or unreachable JSON is silently
 ignored. The file is fetched once per page load, independently of the live search;
 the Refresh studies button continues to refresh the official data.
+
+Studies with at least one usable curated summary field appear first. Within
+the curated and non-curated groups, the existing recruitment/title order is
+preserved, or distance order when “Find studies near me” is active. Empty,
+malformed, or date-only entries do not affect sorting.

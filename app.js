@@ -68,14 +68,19 @@ function reviewedDateLabel(value) {
   })}`;
 }
 
-function addCuratedSummary(card, nctId) {
+function curatedFields(nctId) {
   const entry = Object.hasOwn(curatedSummaries, nctId) ? curatedSummaries[nctId] : null;
-  if (!entry || typeof entry !== "object" || Array.isArray(entry)) return;
-  const fields = CURATED_FIELDS.filter(([key]) =>
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+  return CURATED_FIELDS.filter(([key]) =>
     typeof entry[key] === "string" && entry[key].trim()
   );
+}
+
+function addCuratedSummary(card, nctId) {
+  const fields = curatedFields(nctId);
   // A date alone is not a summary; omit empty or malformed entries.
   if (!fields.length) return;
+  const entry = curatedSummaries[nctId];
 
   const section = document.createElement("section");
   section.className = "curated-summary";
@@ -113,6 +118,11 @@ async function loadCuratedSummaries() {
     els.results.querySelectorAll(".study-card").forEach((card) => {
       addCuratedSummary(card, card.querySelector(".nct-id").textContent);
     });
+    // Move existing cards rather than rebuilding them, preserving open panels.
+    [...els.results.querySelectorAll(".study-card")]
+      .sort((a, b) => Number(Boolean(b.querySelector(".curated-summary")))
+        - Number(Boolean(a.querySelector(".curated-summary"))))
+      .forEach((card) => els.results.append(card));
   } catch (_) {
     // Optional enhancement; live studies remain usable even if this file fails.
   }
@@ -596,6 +606,9 @@ function filteredStudies() {
   if (userLocation) {
     studies.sort((a, b) => (nearestOpenLocation(a)?.distance ?? Infinity) - (nearestOpenLocation(b)?.distance ?? Infinity));
   }
+  // Stable sorting keeps the existing recruitment/title or distance order in each group.
+  studies.sort((a, b) => Number(curatedFields(b.nctId).length > 0)
+    - Number(curatedFields(a.nctId).length > 0));
   return studies;
 }
 
