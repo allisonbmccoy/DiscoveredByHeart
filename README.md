@@ -72,9 +72,8 @@ with no empty summary box. Missing, invalid, or unreachable JSON is silently
 ignored. The file is fetched once per page load, independently of the live search;
 the Refresh studies button continues to refresh the official data.
 
-By default, studies with at least one usable curated summary field appear first,
-preserving recruitment/title order within each group. When “Find studies near me”
-is active, all studies are sorted by distance to their nearest open site,
-regardless of curated content. Studies without usable open-site coordinates go
-last. Clearing distance sorting restores the curated-first default. Empty,
-malformed, or date-only entries do not affect default sorting.
+By default, recruiting studies appear first, then studies are sorted alphabetically
+by title within each recruitment status. Curated summaries do not affect ordering.
+When “Find studies near me” is active, all studies are sorted by distance to their
+nearest open site. Studies without usable open-site coordinates go last. Clearing
+distance sorting restores the default recruitment/title order.

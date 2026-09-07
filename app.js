@@ -217,13 +217,6 @@ async function loadCuratedSummaries() {
     els.results.querySelectorAll(".study-card").forEach((card) => {
       addCuratedSummary(card, card.querySelector(".nct-id").textContent);
     });
-    // Move existing cards rather than rebuilding them, preserving open panels.
-    if (!userLocation) {
-      [...els.results.querySelectorAll(".study-card")]
-        .sort((a, b) => Number(Boolean(b.querySelector(".curated-summary")))
-          - Number(Boolean(a.querySelector(".curated-summary"))))
-        .forEach((card) => els.results.append(card));
-    }
   } catch (_) {
     // Optional enhancement; live studies remain usable even if this file fails.
   }
@@ -673,10 +666,6 @@ function filteredStudies() {
   });
   if (userLocation) {
     studies.sort((a, b) => (nearestOpenLocation(a)?.distance ?? Infinity) - (nearestOpenLocation(b)?.distance ?? Infinity));
-  } else {
-    // Default view prioritizes curated summaries, preserving recruitment/title order in each group.
-    studies.sort((a, b) => Number(curatedFields(b.nctId).length > 0)
-      - Number(curatedFields(a.nctId).length > 0));
   }
   return studies;
 }
