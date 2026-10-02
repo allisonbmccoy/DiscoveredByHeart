@@ -77,3 +77,7 @@ by title within each recruitment status. Curated summaries do not affect orderin
 When “Find studies near me” is active, all studies are sorted by distance to their
 nearest open site. Studies without usable open-site coordinates go last. Clearing
 distance sorting restores the default recruitment/title order.
+
+## Squarespace integration
+
+See [Squarespace embedding instructions](docs/squarespace-embedding.md) and the [copy-and-paste Code Block](docs/squarespace-embed.html). Embed mode uses `?embed=1` to hide the standalone header/footer and automatically report content height to the Sisters by Heart parent page.
