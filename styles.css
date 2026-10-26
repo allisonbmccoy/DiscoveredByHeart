@@ -456,6 +456,10 @@ h1, h2, h3 {
   margin-top: 24px;
 }
 .distance-tools { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+.country-filter { display: flex; align-items: center; gap: 9px; margin-top: 16px; cursor: pointer; }
+.country-filter input { width: 20px; min-height: 20px; height: 20px; margin: 0; }
+.country-filter span { margin: 0; }
+.country-filter-help { margin: 6px 0 0; color: var(--muted); font-size: .84rem; }
 .distance-tools .button { min-height: 42px; }
 #location-status { margin: 0; color: var(--muted); font-size: .84rem; }
 label span { display: block; margin-bottom: 7px; font-weight: 700; font-size: 0.88rem; }

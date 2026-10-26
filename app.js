@@ -235,6 +235,7 @@ const els = {
   age: document.querySelector("#age-filter"),
   status: document.querySelector("#status-filter"),
   state: document.querySelector("#state-filter"),
+  usOnly: document.querySelector("#us-only-filter"),
   nearMe: document.querySelector("#near-me-button"),
   locationStatus: document.querySelector("#location-status"),
   clear: document.querySelector("#clear-filters"),
@@ -661,8 +662,11 @@ function filteredStudies() {
     const ageOk = !age || study.ages.includes(age);
     const statusOk = !status || study.status === status;
     const stateOk = !state || study.states.includes(state);
+    const countryOk = !els.usOnly.checked || study.recruitingLocations.some(
+      (location) => location.country === "United States"
+    );
     const fitOk = basicFit(study).matches;
-    return textOk && ageOk && statusOk && stateOk && fitOk;
+    return textOk && ageOk && statusOk && stateOk && countryOk && fitOk;
   });
   if (userLocation) {
     studies.sort((a, b) => (nearestOpenLocation(a)?.distance ?? Infinity) - (nearestOpenLocation(b)?.distance ?? Infinity));
@@ -867,6 +871,7 @@ function clearFilters() {
   els.age.value = "";
   els.status.value = "";
   els.state.value = "";
+  els.usOnly.checked = false;
   userLocation = null;
   fitProfile = null;
   els.fitForm.reset();
@@ -931,7 +936,7 @@ function findStudiesNearMe() {
   );
 }
 
-[els.text, els.age, els.status, els.state].forEach((el) => {
+[els.text, els.age, els.status, els.state, els.usOnly].forEach((el) => {
   el.addEventListener("input", render);
   el.addEventListener("change", render);
 });
