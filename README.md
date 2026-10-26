@@ -9,6 +9,7 @@ Discovered by Heart is a family-facing Sisters by Heart resource that retrieves 
 - Uses the Sisters by Heart single ventricle Expert Search expression.
 - Shows studies with overall status `RECRUITING` or `NOT_YET_RECRUITING`.
 - Lets families filter results by keyword, age group, recruitment status, state/region, and whether a US site is recruiting or opening soon.
+- Defaults to US-only results; families can uncheck "United States only" to include other countries. Clearing filters restores the US-only default.
 - Links each result to the official ClinicalTrials.gov study record.
 - Displays the ClinicalTrials.gov data refresh date when available.
 

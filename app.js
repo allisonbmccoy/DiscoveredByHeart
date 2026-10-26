@@ -871,7 +871,7 @@ function clearFilters() {
   els.age.value = "";
   els.status.value = "";
   els.state.value = "";
-  els.usOnly.checked = false;
+  els.usOnly.checked = true;
   userLocation = null;
   fitProfile = null;
   els.fitForm.reset();
