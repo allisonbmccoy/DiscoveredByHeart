@@ -28,6 +28,16 @@ The search expression is stored near the top of `app.js` in `SEARCH_QUERY`.
 
 This is a static site and can be hosted with GitHub Pages or another static hosting service. No API key or database is required.
 
+## Embedding in Squarespace
+
+Paste the contents of `squarespace-embed.html` into an HTML Code block.
+The embedded page reports its content height as studies load, filters change,
+and details expand or collapse, so visitors scroll on the Squarespace page.
+The host validates the message origin and source before changing the iframe height.
+Squarespace must allow JavaScript in the Code block; check the published page.
+In a grid section, adjust the block/section layout if it leaves excess space or
+overlaps the content below the expanding iframe.
+
 ## Adding a curated Sisters by Heart summary
 
 Edit only `data/curated-summaries.json`. It starts as `{}` with no summaries.
